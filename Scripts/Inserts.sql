@@ -19,7 +19,7 @@
 -- (no se multiplica por día). Moneda: quetzales (Q).
 -- =====================================================================
 
-USE dbSistemasCrew2;
+USE dbSistemasCrew;
 SET NAMES utf8mb4;
 SET @ahora := NOW();
 

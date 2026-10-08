@@ -1,9 +1,9 @@
-DROP DATABASE IF EXISTS dbSistemasCrew2;
-CREATE DATABASE dbSistemasCrew2
+DROP DATABASE IF EXISTS dbSistemasCrew;
+CREATE DATABASE dbSistemasCrew
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
 
-USE dbSistemasCrew2;
+USE dbSistemasCrew;
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
@@ -357,23 +357,19 @@ BEGIN
     END IF;
 END //
 
-DELIMITER //
-
-CREATE TRIGGER IndiceEquipo
-AFTER INSERT ON Equipo
-FOR EACH ROW
+CREATE TRIGGER IndiceEquipo AFTER INSERT ON Equipo FOR EACH ROW 
 BEGIN
-    DECLARE total INT;
-
+	DECLARE total INT;
     SELECT COUNT(*) INTO total FROM Equipo;
-
-    IF MOD(total, 10) = 0 THEN
-        INSERT INTO IndiceEquipos (Ultimo_id_pagina)
-        VALUES (NEW.Id_Equipo);
+    IF MOD(total,10) = 0 then
+    INSERT Into IndiceEquipos (Ultimo_id_pagina) VALUES(NEW.Id_Equipo);
     END IF;
-END//
+END //;
 
 DELIMITER ;
+-- Fin de Triggers de la tabla de Equipo
+
+
 -- =====================================================================
 -- DATOS SEMILLA MÍNIMOS PARA ARRANCAR EL SISTEMA
 -- =====================================================================

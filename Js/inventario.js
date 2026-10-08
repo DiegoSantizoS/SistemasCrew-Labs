@@ -69,10 +69,11 @@ async function ObtenerEquipos(IdFinal = 0) {
   }
 }
 
-const API_URL_CATEGORIAS =
-  "http://localhost/SistemasCrew-Labs/api/admin/Categorias.php";
+// const API_URL_CATEGORIAS =
+//   "http://localhost/SistemasCrew-Labs/api/admin/Categorias.php";
 
 async function ObtenerCategorias() {
+  const API_URL_CATEGORIAS = API_RUTA("Categorias");
   try {
     const response = await fetch(API_URL_CATEGORIAS);
     const datos = await response.json();
@@ -92,8 +93,7 @@ async function ObtenerCategorias() {
   }
 }
 async function ObtenerUbicaciones() {
-  const API_URL_UBICACIONES =
-    "http://localhost/SistemasCrew-Labs/api/admin/Ubicaciones.php";
+  const API_URL_UBICACIONES = API_RUTA("Ubicaciones");
   try {
     const response = await fetch(API_URL_UBICACIONES);
     const datos = await response.json();
@@ -111,8 +111,7 @@ async function ObtenerUbicaciones() {
 }
 
 async function ObtenerEstadosEquipo() {
-  const API_URL_ESTADOS =
-    "http://localhost/SistemasCrew-Labs/api/admin/Estados_Equipo.php";
+  const API_URL_ESTADOS = API_RUTA("Estados_Equipo");
   try {
     const response = await fetch(API_URL_ESTADOS);
     const datos = await response.json();
