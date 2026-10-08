@@ -1,0 +1,132 @@
+*{
+    /* overflow: hidden; */
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    margin-bottom: 0px;
+}
+
+.MenuToggle {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 70px;
+    height: 100vh;
+    
+    margin-bottom:0px;
+
+    background-color: wheat;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    padding-top: 30px;
+    gap: 15px;
+
+    overflow: hidden;
+
+    transition: width 0.35s ease;
+
+    z-index: 1000;
+
+    border: 1px solid black;
+}
+
+.MenuToggle:hover{
+    width: 260px;
+}
+
+.MenuToggle a {
+    width: 100%;
+
+    text-decoration: none;
+
+}
+
+.NavBox {
+    cursor: pointer;
+    width: 100%;
+    height: 55px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 20px;
+
+    padding: 0 15px;
+
+    white-space: nowrap;
+}
+.NavBox:hover{
+    background-color: #f0f0f0;
+    cursor: pointer;
+}
+
+.NavBox span {
+    opacity: 0;
+
+    transition: opacity 0.2s ease;
+}
+
+.MenuToggle:hover .NavBox span {
+    opacity: 1;
+}
+
+main {
+    overflow: auto;
+    margin-left: 70px;
+
+    width: calc(100% - 70px);
+
+    padding: 30px;
+}
+.Bienvenida {
+    text-align: center;
+}
+
+.MenuToggle:hover #logoimg {
+    width: 200px;
+    height: 200px;
+}
+#logoimg {
+    transition: width 0.35s ease, height 0.35s ease;
+}
+.Perfil:hover{
+    cursor: pointer;
+}
+.Perfil {
+    position: relative;
+}
+
+.Perfil img {
+    display: block;
+    margin-left: 90%;
+    cursor: pointer;
+}
+
+#PerfilNav {
+    display: none;
+
+    position: absolute;
+    top: 60px;
+    right: 0;
+
+    width: 200px;
+
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 8px;
+
+    padding: 10px;
+
+    z-index: 2000;
+}
+
+#PerfilNav.mostrar {
+    display: block;
+}
