@@ -1,14 +1,14 @@
-DROP DATABASE IF EXISTS dbSistemasCrew;
-CREATE DATABASE dbSistemasCrew
+DROP DATABASE IF EXISTS dbSistemasCrew2;
+CREATE DATABASE dbSistemasCrew2
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
 
-USE dbSistemasCrew;
+USE dbSistemasCrew2;
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
---Tablas maestras
+-- Tablas maestras
 
 CREATE TABLE Persona (
     Id_Persona          INT AUTO_INCREMENT PRIMARY KEY,
@@ -367,7 +367,7 @@ BEGIN
 END //;
 
 DELIMITER ;
---Fin de Triggers de la tabla de Equipo
+-- Fin de Triggers de la tabla de Equipo
 
 
 -- =====================================================================
