@@ -362,7 +362,7 @@ BEGIN
 	DECLARE total INT;
     SELECT COUNT(*) INTO total FROM Equipo;
     IF MOD(total,10) = 0 then
-    INSERT Into IndiceEquipo VALUES(NEW.Id_Equipo);
+    INSERT Into IndiceEquipos VALUES(NEW.Id_Equipo);
     END IF;
 END //;
 
