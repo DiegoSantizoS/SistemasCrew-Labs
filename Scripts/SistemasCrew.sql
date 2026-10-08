@@ -357,19 +357,23 @@ BEGIN
     END IF;
 END //
 
-CREATE TRIGGER IndiceEquipo AFTER INSERT ON Equipo FOR EACH ROW 
+DELIMITER //
+
+CREATE TRIGGER IndiceEquipo
+AFTER INSERT ON Equipo
+FOR EACH ROW
 BEGIN
-	DECLARE total INT;
+    DECLARE total INT;
+
     SELECT COUNT(*) INTO total FROM Equipo;
-    IF MOD(total,10) = 0 then
-    INSERT Into IndiceEquipos VALUES(NEW.Id_Equipo);
+
+    IF MOD(total, 10) = 0 THEN
+        INSERT INTO IndiceEquipos (Ultimo_id_pagina)
+        VALUES (NEW.Id_Equipo);
     END IF;
-END //;
+END//
 
 DELIMITER ;
--- Fin de Triggers de la tabla de Equipo
-
-
 -- =====================================================================
 -- DATOS SEMILLA MÍNIMOS PARA ARRANCAR EL SISTEMA
 -- =====================================================================
