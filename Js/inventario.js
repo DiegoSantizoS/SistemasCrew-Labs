@@ -1,16 +1,29 @@
+async function inventoryFetch(url, options = {}) {
+  const headers = new Headers(options.headers || {});
+  headers.set('X-CSRF-Token', document.querySelector('meta[name="csrf-token"]').content);
+  const response = await fetch(url, {...options, headers});
+  if (response.status === 401) {
+    location.assign('login.php');
+    throw new Error('Tu sesión venció.');
+  }
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'No se pudo completar la solicitud.');
+  }
+  return response;
+}
 // const API_URL =
 //   "http://localhost/SistemasCrew-Labs/api/admin/Equipos.php";
 let UltimoId = 0;
 let API_RUTA = (controlador) => {
-  return `http://localhost/SistemasCrew-Labs/api/admin/${controlador}.php`;
+  return `api/admin/${controlador}.php`;
 };
 async function TablaPaginada() {
   const URL = API_RUTA("PaginasEquipos");
   try {
-    const response = await fetch(URL);
+    const response = await inventoryFetch(URL);
     const datos = await response.json();
     const paginaciondiv = document.querySelector("#Paginacion");
-    let paginas = Number(datos["0"].paginas);
 
     /* for (let i = 0; i < paginas; i++) {
       paginaciondiv.innerHTML += `
@@ -22,8 +35,8 @@ async function TablaPaginada() {
     paginaciondiv.innerHTML = "";
     for (let pagina of datos.data) {
       paginaciondiv.innerHTML += `
-        <button 
-          class="Paginador" 
+        <button
+          class="Paginador"
           id="Pagina${pagina.id_Pagina}"
           data-ultimo-id="${pagina.Ultimo_id_pagina}">
           ${pagina.id_Pagina}
@@ -45,7 +58,7 @@ async function TablaPaginada() {
 async function ObtenerEquipos(IdFinal = 0) {
   const URL = API_RUTA("Equipos");
   try {
-    const response = await fetch(`${URL}?ultimo=${IdFinal}`);
+    const response = await inventoryFetch(`${URL}?ultimo=${IdFinal}`);
 
     const datos = await response.json();
 
@@ -75,7 +88,7 @@ async function ObtenerEquipos(IdFinal = 0) {
 async function ObtenerCategorias() {
   const API_URL_CATEGORIAS = API_RUTA("Categorias");
   try {
-    const response = await fetch(API_URL_CATEGORIAS);
+    const response = await inventoryFetch(API_URL_CATEGORIAS);
     const datos = await response.json();
 
     const selectCategoria = document.getElementById("categoria");
@@ -95,7 +108,7 @@ async function ObtenerCategorias() {
 async function ObtenerUbicaciones() {
   const API_URL_UBICACIONES = API_RUTA("Ubicaciones");
   try {
-    const response = await fetch(API_URL_UBICACIONES);
+    const response = await inventoryFetch(API_URL_UBICACIONES);
     const datos = await response.json();
     const ubicaciones = document.getElementById("ubicacion");
 
@@ -113,7 +126,7 @@ async function ObtenerUbicaciones() {
 async function ObtenerEstadosEquipo() {
   const API_URL_ESTADOS = API_RUTA("Estados_Equipo");
   try {
-    const response = await fetch(API_URL_ESTADOS);
+    const response = await inventoryFetch(API_URL_ESTADOS);
     const datos = await response.json();
     const estados = document.getElementById("estado");
     datos.data.forEach((estado) => {
@@ -145,7 +158,7 @@ function cargarModal() {
     event.preventDefault();
     const data = new FormData(form);
     try {
-      const response = await fetch(URL, {
+      const response = await inventoryFetch(URL, {
         method: "POST",
         body: data,
       });

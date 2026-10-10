@@ -1,7 +1,9 @@
 <?php
-require_once("../core/Connection.php");
-require_once("../models/PaginasEquipos.php");
-require_once("../core/Response.php");
+require_once __DIR__ . '/../helpers/auth.php';
+auth_admin();
+require_once(__DIR__ . "/../core/Connection.php");
+require_once(__DIR__ . "/../models/PaginasEquipos.php");
+require_once(__DIR__ . "/../core/Response.php");
 
 $connection = new Connection();
 $response = new Response();

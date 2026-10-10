@@ -1,8 +1,10 @@
 <?php
+require_once __DIR__ . '/../helpers/auth.php';
+auth_admin();
 
-Require_once("../core/Connection.php");
-Require_Once("../core/Response.php");
-Require_once("../models/Ubicaciones.php");
+require_once(__DIR__ . "/../core/Connection.php");
+require_once(__DIR__ . "/../core/Response.php");
+require_once(__DIR__ . "/../models/Ubicaciones.php");
 
 $conection = new Connection();
 $response = new Response();

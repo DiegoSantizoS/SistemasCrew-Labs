@@ -1,9 +1,14 @@
 <?php
-require_once("Env.php");
+require_once __DIR__ . "/Env.php";
 Env::load(__DIR__ . "/.env");
 
 #   SECURITY & SESSIONS
-ini_set('session.cookie_secure', '1');
+ini_set('session.cookie_secure', (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? '1' : '0');
+ini_set('session.use_strict_mode', '1');
+$sessionRoot = realpath(__DIR__ . '/../..');
+$documentRoot = realpath($_SERVER['DOCUMENT_ROOT'] ?? $sessionRoot);
+$sessionPath = '/' . trim(str_replace('\\', '/', substr($sessionRoot, strlen($documentRoot))), '/') . '/';
+ini_set('session.cookie_path', $sessionPath === '//' ? '/' : $sessionPath);
 ini_set('session.cookie_httponly', '1');
 ini_set('session.cookie_samesite', 'Strict');
 
