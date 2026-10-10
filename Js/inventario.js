@@ -1,8 +1,8 @@
 // const API_URL =
-//   "http://localhost/ProyectoDesarrolloWeb.github.io/api/admin/Equipos.php";
+//   "http://localhost/SistemasCrew-Labs/api/admin/Equipos.php";
 let UltimoId = 0;
 let API_RUTA = (controlador) => {
-  return `http://localhost/ProyectoDesarrolloWeb.github.io/api/admin/${controlador}.php`;
+  return `http://localhost/SistemasCrew-Labs/api/admin/${controlador}.php`;
 };
 async function TablaPaginada() {
   const URL = API_RUTA("PaginasEquipos");
@@ -70,7 +70,7 @@ async function ObtenerEquipos(IdFinal = 0) {
 }
 
 const API_URL_CATEGORIAS =
-  "http://localhost/ProyectoDesarrolloWeb.github.io/api/admin/Categorias.php";
+  "http://localhost/SistemasCrew-Labs/api/admin/Categorias.php";
 
 async function ObtenerCategorias() {
   try {
@@ -93,7 +93,7 @@ async function ObtenerCategorias() {
 }
 async function ObtenerUbicaciones() {
   const API_URL_UBICACIONES =
-    "http://localhost/ProyectoDesarrolloWeb.github.io/api/admin/Ubicaciones.php";
+    "http://localhost/SistemasCrew-Labs/api/admin/Ubicaciones.php";
   try {
     const response = await fetch(API_URL_UBICACIONES);
     const datos = await response.json();
@@ -112,7 +112,7 @@ async function ObtenerUbicaciones() {
 
 async function ObtenerEstadosEquipo() {
   const API_URL_ESTADOS =
-    "http://localhost/ProyectoDesarrolloWeb.github.io/api/admin/Estados_Equipo.php";
+    "http://localhost/SistemasCrew-Labs/api/admin/Estados_Equipo.php";
   try {
     const response = await fetch(API_URL_ESTADOS);
     const datos = await response.json();
