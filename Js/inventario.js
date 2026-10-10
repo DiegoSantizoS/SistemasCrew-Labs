@@ -19,7 +19,7 @@ async function TablaPaginada() {
         </button>
       `;
     }*/
-   paginaciondiv.innerHTML = "";
+    paginaciondiv.innerHTML = "";
     for (let pagina of datos.data) {
       paginaciondiv.innerHTML += `
         <button 
@@ -69,10 +69,11 @@ async function ObtenerEquipos(IdFinal = 0) {
   }
 }
 
-const API_URL_CATEGORIAS =
-  "http://localhost/SistemasCrew-Labs/api/admin/Categorias.php";
+// const API_URL_CATEGORIAS =
+//   "http://localhost/SistemasCrew-Labs/api/admin/Categorias.php";
 
 async function ObtenerCategorias() {
+  const API_URL_CATEGORIAS = API_RUTA("Categorias");
   try {
     const response = await fetch(API_URL_CATEGORIAS);
     const datos = await response.json();
@@ -92,8 +93,7 @@ async function ObtenerCategorias() {
   }
 }
 async function ObtenerUbicaciones() {
-  const API_URL_UBICACIONES =
-    "http://localhost/SistemasCrew-Labs/api/admin/Ubicaciones.php";
+  const API_URL_UBICACIONES = API_RUTA("Ubicaciones");
   try {
     const response = await fetch(API_URL_UBICACIONES);
     const datos = await response.json();
@@ -111,8 +111,7 @@ async function ObtenerUbicaciones() {
 }
 
 async function ObtenerEstadosEquipo() {
-  const API_URL_ESTADOS =
-    "http://localhost/SistemasCrew-Labs/api/admin/Estados_Equipo.php";
+  const API_URL_ESTADOS = API_RUTA("Estados_Equipo");
   try {
     const response = await fetch(API_URL_ESTADOS);
     const datos = await response.json();
@@ -143,20 +142,20 @@ function cargarModal() {
     modal.close();
   });
   form.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const data = new FormData(form);
-      try {
-        const response = await fetch(URL, {
-          method: "POST",
-          body: data,
-        });
-        const result = await response.json();
-        alert(result.message);
-      } catch (error) {
-        alert("Error al enviar el formulario:" + error);
-      }
-      form.reset();
-      tbody.innerHTML = "";
-      TablaPaginada();  
-    });
+    event.preventDefault();
+    const data = new FormData(form);
+    try {
+      const response = await fetch(URL, {
+        method: "POST",
+        body: data,
+      });
+      const result = await response.json();
+      alert(result.message);
+    } catch (error) {
+      alert("Error al enviar el formulario:" + error);
+    }
+    form.reset();
+    tbody.innerHTML = "";
+    TablaPaginada();
+  });
 }

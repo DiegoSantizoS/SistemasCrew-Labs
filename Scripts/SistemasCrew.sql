@@ -1,9 +1,9 @@
-DROP DATABASE IF EXISTS dbSistemasCrew2;
-CREATE DATABASE dbSistemasCrew2
+DROP DATABASE IF EXISTS dbSistemasCrew;
+CREATE DATABASE dbSistemasCrew
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
 
-USE dbSistemasCrew2;
+USE dbSistemasCrew;
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
@@ -362,7 +362,7 @@ BEGIN
 	DECLARE total INT;
     SELECT COUNT(*) INTO total FROM Equipo;
     IF MOD(total,10) = 0 then
-    INSERT Into IndiceEquipos VALUES(NEW.Id_Equipo);
+    INSERT Into IndiceEquipos (Ultimo_id_pagina) VALUES(NEW.Id_Equipo);
     END IF;
 END //;
 
