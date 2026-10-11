@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once(__DIR__  .  "/Configuration.php");
 require_once(__DIR__  .  "/Response.php");
 
@@ -13,7 +13,7 @@ class Connection extends PDO
             parent::__construct($dsn, USER_DB, PASSWORD_DB);
             $this->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
-            Response::error("Ocurrio un error", -1001, 400);
+            Response::error("Servicio temporalmente no disponible.", -1001, 503);
         }
     }
 }

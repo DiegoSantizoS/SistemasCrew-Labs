@@ -1,3 +1,7 @@
+<?php
+require_once __DIR__ . '/api/helpers/auth.php';
+$user=auth_require();
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -55,14 +59,10 @@
             <nav id="PerfilNav">
                 <a href="">
                     <div id="Usuario">
-                        Perfil
+                        <?= htmlspecialchars($user['nombre'], ENT_QUOTES, 'UTF-8') ?>
                     </div>
                 </a>
-                <a href="">
-                    <div id="CerrarSesion">
-                        Cerrar sesión
-                    </div>
-                </a>
+                <form action="api/auth/logout.php" method="post"><input type="hidden" name="csrf" value="<?= htmlspecialchars(auth_token(), ENT_QUOTES, 'UTF-8') ?>"><button id="CerrarSesion" type="submit" style="font:inherit;border:0;background:transparent;color:inherit;cursor:pointer">Cerrar sesión</button></form>
             </nav>
         </div>
 
@@ -72,9 +72,9 @@
         <div class="Contenido">
 
         </div>
-        <script src="Js/index.js">
+        <meta name="csrf-token" content="<?= htmlspecialchars(auth_token(), ENT_QUOTES, 'UTF-8') ?>"><script src="Js/index.js">
         </script>
-        <script src="Js/Inventario.js">
+        <script src="Js/inventario.js">
         </script>
     </main>
 </body>
