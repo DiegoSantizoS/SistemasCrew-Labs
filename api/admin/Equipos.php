@@ -81,7 +81,7 @@ switch ($method) {
         break;
     case 'DELETE':
         try {
-            $Codigo = $_GET['Codigo'] ?? null;
+            $Codigo = $_GET['codigo'] ?? $_GET['Codigo'] ?? null;
 
             if (empty($Codigo) || trim($Codigo) === '') {
                 $response->error("Faltan datos obligatorios", 2002, 400);

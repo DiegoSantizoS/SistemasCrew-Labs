@@ -15,11 +15,12 @@ async function inventoryFetch(url, options = {}) {
   }
   return response;
 }
-
+//Variables globales y constantes
 let UltimoId = 0;
+let paginaActual = 1;
+let ultimaPagina = 1;
 let action = "GUARDAR";
 let form = document.querySelector("#equipoForm");
-const tbody = document.querySelector("#inventarioTable tbody");
 
 //Función flecha para devolver la url de la api
 let API_RUTA = (controlador) => {
@@ -27,7 +28,7 @@ let API_RUTA = (controlador) => {
 };
 
 //Función para paginar la tabla
-async function TablaPaginada() {
+async function TablaPaginada(irAultimaPagina = false) {
   const URL = API_RUTA("PaginasEquipos");
   try {
     const response = await inventoryFetch(URL);
@@ -47,15 +48,22 @@ async function TablaPaginada() {
     }
 
     const paginasbtn = document.querySelectorAll(".Paginador");
+    const ultima = paginasbtn[paginasbtn.length - 1];
+    ultimaPagina = ultima ? Number(ultima.textContent) : 1;
+
     paginasbtn.forEach((boton) => {
       boton.addEventListener("click", () => {
-        const ultimoId = boton.dataset.ultimoId;
-        ObtenerEquipos(ultimoId);
+        paginaActual = Number(boton.textContent);
+        UltimoId = Number(boton.dataset.ultimoId);
+        ObtenerEquipos(UltimoId);
       });
     });
 
-    //Mostrar primera página siempre al iniciar
-    ObtenerEquipos(0);
+    const destino = irAultimaPagina ? ultimaPagina : paginaActual;
+    const botonDestino = document.getElementById(`Pagina${destino}`) ?? ultima;
+    paginaActual = botonDestino ? Number(botonDestino.textContent) : 1;
+    UltimoId = Number(botonDestino?.dataset.ultimoId ?? 0);
+    await ObtenerEquipos(UltimoId);
   } catch (error) {
     alert("Error al cargar los datos");
   }
@@ -90,16 +98,35 @@ async function ObtenerEquipos(IdFinal = 0) {
       row.insertCell().textContent = equipo.Estado;
 
       const celdaAccion = row.insertCell();
-      const boton = document.createElement("button");
+      const btnDetalle = document.createElement("button");
+      const btnEditar = document.createElement("button");
+      const btnEliminar = document.createElement("button");
 
-      boton.type = "button";
-      boton.textContent = "Detalles";
-      boton.classList.add("btn-preview");
+      btnDetalle.type = "button";
+      btnDetalle.textContent = "Detalles";
+      btnDetalle.classList.add("btn-preview");
 
-      boton.addEventListener("click", () => {
+      btnEditar.type = "button";
+      btnEditar.textContent = "Editar";
+      btnEditar.classList.add("btn-edit");
+
+      btnEliminar.type = "button";
+      btnEliminar.disabled = estado === "dado-de-baja";
+      btnEliminar.textContent = "Eliminar";
+      btnEliminar.classList.add("btn-delete");
+
+      btnDetalle.addEventListener("click", () => {
         ObtenerPreview(equipo.Codigo);
       });
-      celdaAccion.appendChild(boton);
+      btnEditar.addEventListener("click", () => {
+        editarEquipo(equipo.Codigo);
+      });
+      btnEliminar.addEventListener("click", () => {
+        EliminarEquipo(equipo.Codigo);
+      });
+      celdaAccion.appendChild(btnDetalle);
+      celdaAccion.appendChild(btnEditar);
+      celdaAccion.appendChild(btnEliminar);
     });
   } catch (error) {
     alert("Error al cargar los equipos");
@@ -207,7 +234,6 @@ async function ObtenerEstadosEquipo() {
   }
 }
 
-
 function cargarModal() {
   form = document.querySelector("#equipoForm");
 
@@ -220,7 +246,7 @@ function cargarModal() {
       form,
       modal,
       abrir,
-      cerrar
+      cerrar,
     });
     return;
   }
@@ -231,11 +257,13 @@ function cargarModal() {
     if (action === "GUARDAR") {
       await nuevoEquipo();
     } else {
-      await editarEquipo();
+      await actualizarEquipo();
     }
   });
 
   abrir.addEventListener("click", () => {
+    action = "GUARDAR";
+    form.reset();
     modal.showModal();
   });
 
@@ -245,29 +273,82 @@ function cargarModal() {
   });
 }
 
-
 async function nuevoEquipo() {
   const URL = API_RUTA("Equipos");
+
+  const data = new FormData(form);
   try {
-    const data = new FormData(form);
-    try {
-      const response = await inventoryFetch(URL, {
-        method: "POST",
-        body: data, //body: JSON.STRINGFY(data); Esto es para PUT
-      });
-      const result = await response.json();
-      alert(result.message);
-    } catch (error) {
-      alert("Error al enviar el formulario:" + error);
-    }
+    const response = await inventoryFetch(URL, {
+      method: "POST",
+      body: data, //body: JSON.STRINGFY(data); Esto es para PUT
+    });
+    const result = await response.json();
+    alert(result.message);
     form.reset();
-    tbody.innerHTML = "";
-    TablaPaginada();
+    await TablaPaginada(true);
   } catch (error) {
-    alert("Error al insertar equipo, intente de nuevo");
-    form.reset();
+    alert("Error al enviar el formulario:" + error);
   }
 }
-async function editarEquipo() {
-  return null;
+async function editarEquipo(codigo) {
+  const URL = API_RUTA("Equipos");
+  let modal = document.querySelector("#ModalEquipos");
+
+  try{
+    const response = await inventoryFetch(`${URL}?codigo=${encodeURIComponent(codigo)}`);
+    const datos = await response.json();
+    if (!response.ok || !datos.data || Array.isArray(datos.data)) {
+      alert("Error al obtener los datos del equipo");
+      return;
+    }
+    form.reset();
+    const equipo = datos.data;
+    form.querySelector("#id_equipo").value = equipo.id;
+    form.querySelector("#codigo").value = equipo.Codigo;
+    form.querySelector("#descripcion").value = equipo.Descripcion;
+    form.querySelector("#categoria").value = String(equipo.Id_Categoria ?? "");
+    form.querySelector("#ubicacion").value = String(equipo.Id_Ubicacion ?? "");
+    form.querySelector("#estado").value = String(equipo.Id_Estado_Equipo ?? "");
+    form.querySelector("#marca").value = equipo.Marca;
+    form.querySelector("#modelo").value = equipo.Modelo;
+    form.querySelector("#serie").value = equipo.Serie;
+    form.querySelector("#descripcion").value = equipo.Descripcion;
+
+    modal.showModal();
+    action = "EDITAR";
+  } catch (error) {
+    alert("Error al obtener los datos del equipo");
+  }
+}
+async function actualizarEquipo() {
+  const URL = API_RUTA("Equipos");
+  const data = new URLSearchParams(new FormData(form));
+  try {
+    const response = await inventoryFetch(URL, {
+      method: "PUT",
+      body: data,
+    });
+    const result = await response.json();
+    alert(result.message);
+    await ObtenerEquipos(UltimoId);
+  } catch (error) {
+    alert("Error al actualizar el equipo" + error);
+  }
+}
+async function EliminarEquipo(codigo) {
+  const URL = API_RUTA("Equipos");
+  if (!confirm("¿Estás seguro de que deseas eliminar este equipo?")) {
+    return;
+  }
+  try {
+    const response = await inventoryFetch(
+      `${URL}?codigo=${encodeURIComponent(codigo)}`,
+      { method: "DELETE" },
+    );
+    const result = await response.json();
+    alert(result.message);
+    await ObtenerEquipos(UltimoId);
+  } catch (error) {
+    alert("Error al eliminar el equipo");
+  }
 }

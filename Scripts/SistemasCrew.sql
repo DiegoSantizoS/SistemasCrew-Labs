@@ -250,9 +250,9 @@ CREATE INDEX idx_historial_equipo       ON Historial(Id_Equipo);
 
 SET FOREIGN_KEY_CHECKS = 1;
 
---TRIGGERS de auditoría para registrar cambios en la bitácora
+-- TRIGGERS de auditoría para registrar cambios en la bitácora
 
---TRIGGERS de la tabla de Equipo
+-- TRIGGERS de la tabla de Equipo
 DELIMITER //
 CREATE TRIGGER BitacoraEquipoNuevo AFTER INSERT  ON Equipo FOR EACH ROW
 BEGIN
@@ -278,6 +278,19 @@ BEGIN
         )
     );
 END //
+
+-- Actualizar la fecha de baja si el estado cambia de "Dado de baja" a otro estado y viceversa
+CREATE TRIGGER ActualizarFechaBaja
+BEFORE UPDATE ON Equipo
+FOR EACH ROW
+BEGIN
+    IF OLD.Id_Estado_Equipo = 4 AND NEW.Id_Estado_Equipo <> 4 THEN
+        SET NEW.Fecha_Baja = NULL;
+	ELSEIF New.Id_Estado_Equipo = 4 and Old.Id_Estado_Equipo <> 4 THEN
+		SET New.Fecha_Baja = Now();
+    END IF;
+END //
+
 
 CREATE TRIGGER BitacoraEquipoActualizar AFTER UPDATE ON Equipo FOR EACH ROW
 BEGIN

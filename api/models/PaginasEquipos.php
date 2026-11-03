@@ -9,15 +9,16 @@ class PaginasEquipos{
         $this->response = $res;
     }
     function getall(){
-        $query = "SELECT * from IndiceEquipos;";
+        $query = "SELECT id_Pagina, Ultimo_id_pagina
+                  FROM IndiceEquipos
+                  WHERE Ultimo_id_pagina = 0
+                     OR Ultimo_id_pagina < (SELECT MAX(id) FROM vwEquipo)
+                  ORDER BY id_Pagina";
         $statement = $this->connection->prepare($query);
         $statement->execute();
         $result = $statement->fetchAll(PDO::FETCH_ASSOC);
-        $query2 = "SELECT COUNT(*) AS paginas from IndiceEquipos;";
-        $statement2 = $this->connection->prepare($query2);
-        $statement2->execute();
-        $result2 = $statement2->fetchAll(PDO::FETCH_ASSOC);
+        $result2 = [['paginas' => count($result)]];
         $this->response->success("Indices obtenidos correctamente", $result, 1, $result2);
         }
-
+    
 }
