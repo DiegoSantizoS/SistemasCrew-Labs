@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/../helpers/auth.php';
-auth_admin();
+require_once __DIR__ . '/../auth/auth.middleWare.php';
+$user = requirePermission('Equipos');
 
 require_once(__DIR__ . "/../core/Connection.php");
 require_once(__DIR__ . "/../core/Response.php");

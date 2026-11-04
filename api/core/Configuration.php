@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/RequestSecurity.php';
+RequestSecurity::enforce();
 require_once __DIR__ . "/Env.php";
 Env::load(__DIR__ . "/.env");
 

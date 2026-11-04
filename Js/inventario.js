@@ -22,6 +22,7 @@ let ultimaPagina = 1;
 let action = "GUARDAR";
 let form = document.querySelector("#equipoForm");
 let solicitudEquipos = 0;
+let textoBusquedaActual = '';
 let cursoresBusqueda = [0];
 let paginaBusqueda = 0;
 
@@ -31,6 +32,7 @@ function inicializarBuscadorInventario() {
   let temporizador;
   cursoresBusqueda = [0];
   paginaBusqueda = 0;
+  textoBusquedaActual = '';
   solicitudEquipos++;
   buscador.addEventListener("input", () => {
     clearTimeout(temporizador);
@@ -42,7 +44,7 @@ function inicializarBuscadorInventario() {
     document.querySelector("#PaginacionBusqueda").replaceChildren();
     document.querySelector("#resultadoBusqueda").textContent = "Buscando…";
     // Espera a que el usuario deje de escribir antes de consultar la API.
-    temporizador = setTimeout(() => ObtenerEquipos(UltimoId), 250);
+    temporizador = setTimeout(() => ObtenerEquipos(0), 250);
   });
 }
 
@@ -123,12 +125,24 @@ async function ObtenerEquipos(IdFinal = 0) {
   const URL = API_RUTA("Equipos");
   const buscador = document.querySelector("#buscarEquipo");
   const busqueda = buscador.value.trim();
+  if (busqueda !== textoBusquedaActual) {
+    textoBusquedaActual = busqueda;
+    cursoresBusqueda = [0];
+    paginaBusqueda = 0;
+    if (busqueda) IdFinal = 0;
+  }
+  if (!busqueda) IdFinal = UltimoId;
   // Solo la solicitud más reciente puede modificar la tabla visible.
   const solicitud = ++solicitudEquipos;
   const sigueVigente = () => solicitud === solicitudEquipos && buscador === document.querySelector("#buscarEquipo");
-  // Cada búsqueda usa su propio cursor; al borrar vuelve la página habitual.
   document.querySelector("#Paginacion").hidden = busqueda !== "";
-  document.querySelector("#PaginacionBusqueda").hidden = busqueda === "";
+  let paginacionBusqueda = document.querySelector('#PaginacionBusqueda');
+  if (!paginacionBusqueda) {
+    paginacionBusqueda = document.createElement('div');
+    paginacionBusqueda.id = 'PaginacionBusqueda';
+    document.querySelector('#Paginacion').after(paginacionBusqueda);
+  }
+  paginacionBusqueda.hidden = !busqueda;
   try {
     // URLSearchParams codifica espacios y caracteres especiales del texto.
     const parametros = new URLSearchParams({
@@ -140,7 +154,7 @@ async function ObtenerEquipos(IdFinal = 0) {
     if (!sigueVigente()) return;
     const tabla = document.querySelector("#inventarioTable tbody");
     document.querySelector("#resultadoBusqueda").textContent = busqueda
-      ? `${datos.data.length} equipo(s) en esta página.`
+      ? `${datos.data.length} equipo(s) en esta página${datos.has_more ? '; hay más resultados' : ''}.`
       : "";
     if (busqueda) mostrarPaginacionBusqueda(datos.paginacion);
 

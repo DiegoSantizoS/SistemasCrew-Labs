@@ -1,10 +1,10 @@
 <?php
-require_once __DIR__ . '/../helpers/auth.php';
+require_once __DIR__ . '/../auth/auth.middleWare.php';
 require_once __DIR__ . '/../core/Connection.php';
 require_once __DIR__ . '/../core/Response.php';
 require_once __DIR__ . '/../helpers/helpers.php';
 
-$user = auth_require(true);
+$user = requirePermission('Prestamos');
 $db = new Connection();
 $method = $_SERVER['REQUEST_METHOD'];
 
