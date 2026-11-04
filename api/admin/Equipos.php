@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/../helpers/auth.php';
-//auth_admin();
+require_once __DIR__ . '/../auth/auth.middleWare.php';
+$user = requirePermission('Equipos');
 require_once(__DIR__ . "/../core/Connection.php");
 require_once(__DIR__ . "/../models/Equipo.php");
 require_once(__DIR__ . "/../core/Response.php");
@@ -12,6 +12,12 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
     case 'GET':
+        if (isset($_GET['codigo']) && (!is_string($_GET['codigo']) || mb_strlen($_GET['codigo']) > 50)) {
+            $response->error('Código de equipo no válido.', -422, 422);
+        }
+        if (isset($_GET['ultimo']) && filter_var($_GET['ultimo'], FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]) === false) {
+            $response->error('Índice de página no válido.', -422, 422);
+        }
         try {
             $equipo = new Equipo($conection, $response);
 

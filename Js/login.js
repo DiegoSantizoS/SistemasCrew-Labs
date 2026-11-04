@@ -61,6 +61,7 @@
       const submit = form.querySelector('[type="submit"]'); const label = submit.textContent;
       submit.textContent='Procesando…';
       let registered = false;
+      let loginFailed = false;
       try {
         const response = await fetch('api/auth/' + (form.dataset.form === 'signup' ? 'register' : 'login') + '.php', {
           method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)
@@ -73,10 +74,17 @@
           const login=panels[0].querySelector('form'); login.elements.email.value=payload.email;
           login.querySelector('[data-server]').textContent=result.message;
         }
-      } catch (error) {status.textContent=error.message || 'No se pudo conectar con el servidor.';}
+      } catch (error) {
+        status.textContent=error.message || 'No se pudo conectar con el servidor.';
+        if (form.dataset.form === 'login') {
+          form.elements.password.value = '';
+          loginFailed = true;
+        }
+      }
       finally {
         busy=false; controls.forEach(c => c.disabled=false); form.removeAttribute('aria-busy');submit.textContent=label;
         if (registered) {select(0);panels[0].querySelector('[name="password"]').focus();}
+        if (loginFailed) form.elements.password.focus();
       }
     });
   });

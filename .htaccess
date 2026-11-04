@@ -1,0 +1,11 @@
+Options -Indexes
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteCond %{REMOTE_ADDR} !^127\.0\.0\.1$
+RewriteCond %{REMOTE_ADDR} !^::1$
+RewriteRule ^ - [F,L]
+RewriteRule (^|/)\. - [F,L]
+RewriteRule ^(?:Nesflis|Scripts|tests|api/core|api/helpers|api/models)(?:/|$) - [F,L,NC]
+<FilesMatch "(?i)(?:\.(?:env(?:\..*)?|sql|ini|log|bak|backup|old|orig|save|swp|zip|tar|gz|7z|md)|~)$">
+    Require all denied
+</FilesMatch>

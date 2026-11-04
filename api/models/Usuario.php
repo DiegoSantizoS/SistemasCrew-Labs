@@ -4,8 +4,13 @@ class Usuario {
     private $db;
     function __construct(PDO $db) { $this->db = $db; }
     function identity($id) {
-        $q = $this->db->prepare('SELECT u.Id_Usuario AS id, r.Nombre_Rol AS rol, e.Estado_Usuario AS estado FROM Usuario u JOIN Rol r ON r.Id_Rol=u.Id_Rol JOIN Estado_Usuario e ON e.Id_Estado=u.Id_Estado WHERE u.Id_Usuario=?');
+        $q = $this->db->prepare('SELECT u.Id_Usuario AS id, u.Id_Rol AS role_id, r.Nombre_Rol AS rol, e.Estado_Usuario AS estado, CONCAT(p.Nombres_Persona, \' \', p.Apellidos_Persona) AS nombre FROM Usuario u JOIN Persona p ON p.Id_Persona=u.Id_Persona JOIN Rol r ON r.Id_Rol=u.Id_Rol JOIN Estado_Usuario e ON e.Id_Estado=u.Id_Estado WHERE u.Id_Usuario=?');
         $q->execute([$id]); return $q->fetch(PDO::FETCH_ASSOC);
+    }
+    function hasPermission($id, $module, $action) {
+        $q = $this->db->prepare('SELECT 1 FROM Usuario u JOIN Estado_Usuario e ON e.Id_Estado=u.Id_Estado JOIN Rol_Permiso rp ON rp.Id_Rol=u.Id_Rol JOIN Permiso p ON p.Id_Permiso=rp.Id_Permiso JOIN Modulo m ON m.Id_Modulo=p.Id_Modulo JOIN Accion a ON a.Id_Accion=p.Id_Accion WHERE u.Id_Usuario=? AND e.Estado_Usuario=\'Activo\' AND m.Nombre_Modulo=? AND a.Nombre_Accion=? LIMIT 1');
+        $q->execute([$id, $module, $action]);
+        return (bool)$q->fetchColumn();
     }
     function login($email, $password) {
         $q = $this->db->prepare('SELECT u.Id_Usuario, u.Contrasena_Usuario, p.Nombres_Persona, p.Apellidos_Persona, e.Estado_Usuario FROM Usuario u JOIN Persona p ON p.Id_Persona=u.Id_Persona JOIN Estado_Usuario e ON e.Id_Estado=u.Id_Estado WHERE p.Correo_Persona=?');
