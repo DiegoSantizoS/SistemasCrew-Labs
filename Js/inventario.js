@@ -21,6 +21,22 @@ let paginaActual = 1;
 let ultimaPagina = 1;
 let action = "GUARDAR";
 let form = document.querySelector("#equipoForm");
+let solicitudEquipos = 0;
+
+// Se ejecuta después de insertar el HTML del inventario en la página.
+function inicializarBuscadorInventario() {
+  const buscador = document.querySelector("#buscarEquipo");
+  let temporizador;
+  solicitudEquipos++;
+  buscador.addEventListener("input", () => {
+    clearTimeout(temporizador);
+    // Invalida respuestas anteriores desde la primera pulsación.
+    solicitudEquipos++;
+    document.querySelector("#resultadoBusqueda").textContent = "Buscando…";
+    // Espera a que el usuario deje de escribir antes de consultar la API.
+    temporizador = setTimeout(() => ObtenerEquipos(UltimoId), 250);
+  });
+}
 
 //Función flecha para devolver la url de la api
 let API_RUTA = (controlador) => {
@@ -37,14 +53,14 @@ async function TablaPaginada(irAultimaPagina = false) {
 
     paginaciondiv.innerHTML = "";
     for (let pagina of datos.data) {
-      paginaciondiv.innerHTML += `
-        <button
-          class="Paginador"
-          id="Pagina${pagina.id_Pagina}"
-          data-ultimo-id="${pagina.Ultimo_id_pagina}">
-          ${pagina.id_Pagina}
-        </button>
-      `;
+      const boton = document.createElement("button");
+      boton.type = "button";
+      boton.classList.add("Paginador");
+      boton.id = `Pagina${pagina.id_Pagina}`;
+      boton.dataset.ultimoId = pagina.Ultimo_id_pagina;
+      boton.textContent = pagina.id_Pagina;
+
+      paginaciondiv.appendChild(boton);
     }
 
     const paginasbtn = document.querySelectorAll(".Paginador");
@@ -72,13 +88,31 @@ async function TablaPaginada(irAultimaPagina = false) {
 //Función para mostrar los equipos y renderizarlos en la tabla
 async function ObtenerEquipos(IdFinal = 0) {
   const URL = API_RUTA("Equipos");
+  const buscador = document.querySelector("#buscarEquipo");
+  const busqueda = buscador.value.trim();
+  // Solo la solicitud más reciente puede modificar la tabla visible.
+  const solicitud = ++solicitudEquipos;
+  const sigueVigente = () => solicitud === solicitudEquipos && buscador === document.querySelector("#buscarEquipo");
+  // La búsqueda muestra todas las coincidencias; sin texto vuelve la paginación.
+  document.querySelector("#Paginacion").hidden = busqueda !== "";
   try {
-    const response = await inventoryFetch(`${URL}?ultimo=${IdFinal}`);
+    // URLSearchParams codifica espacios y caracteres especiales del texto.
+    const parametros = new URLSearchParams({ ultimo: IdFinal, buscar: busqueda });
+    const response = await inventoryFetch(`${URL}?${parametros}`);
     const datos = await response.json();
+    if (!sigueVigente()) return;
     const tabla = document.querySelector("#inventarioTable tbody");
+    document.querySelector("#resultadoBusqueda").textContent = busqueda
+      ? `${datos.data.length} equipo(s) encontrado(s).`
+      : "";
 
     //Limpiar la tabla
     tabla.innerHTML = "";
+    if (datos.data.length === 0) {
+      const celda = tabla.insertRow().insertCell();
+      celda.colSpan = 5;
+      celda.textContent = busqueda ? "No se encontraron equipos que coincidan." : "No hay equipos para mostrar.";
+    }
 
     datos.data.forEach((equipo) => {
       let row = tabla.insertRow();
@@ -129,6 +163,8 @@ async function ObtenerEquipos(IdFinal = 0) {
       celdaAccion.appendChild(btnEliminar);
     });
   } catch (error) {
+    if (!sigueVigente()) return;
+    document.querySelector("#resultadoBusqueda").textContent = "No se pudieron cargar los equipos. Intenta nuevamente.";
     alert("Error al cargar los equipos");
   }
 }
@@ -294,7 +330,7 @@ async function editarEquipo(codigo) {
   const URL = API_RUTA("Equipos");
   let modal = document.querySelector("#ModalEquipos");
 
-  try{
+  try {
     const response = await inventoryFetch(`${URL}?codigo=${encodeURIComponent(codigo)}`);
     const datos = await response.json();
     if (!response.ok || !datos.data || Array.isArray(datos.data)) {

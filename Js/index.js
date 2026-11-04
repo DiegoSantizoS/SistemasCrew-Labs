@@ -19,6 +19,8 @@ function cargarInventario() {
       .then((html) => {
         $(".Contenido").innerHTML = html;
 
+        // Conecta el buscador una vez que su campo existe en el documento.
+        inicializarBuscadorInventario();
         TablaPaginada();
         ObtenerCategorias();
         ObtenerUbicaciones();

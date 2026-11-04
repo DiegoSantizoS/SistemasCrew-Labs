@@ -1,3 +1,29 @@
+.buscador-inventario {
+    display: grid;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+#buscarEquipo {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 34rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #94a3b8;
+    border-radius: 0.5rem;
+    font: inherit;
+}
+
+#buscarEquipo:focus {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+}
+
+#resultadoBusqueda {
+    margin: 0;
+    color: #475569;
+}
+
 .disponible{
     background-color: #B0FFB5;
 }
