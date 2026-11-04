@@ -6,7 +6,7 @@ PerfilImg.addEventListener("click", function () {
 });
 let $ = (doc) => document.querySelector(doc);
 let $$ = (doc) => document.querySelectorAll(doc);
-
+const historialNav = $("#HistorialNav");
 
 function cargarInventario() {
   let InventarioNav = $("#InventarioNav");
@@ -42,6 +42,21 @@ function cargarInventario() {
   });
 }
 
+function cargarHistorial() {
+  historialNav.addEventListener("click", function () {
+    $(".Bienvenida").style.display = "none";
+    fetch("Sites/historial.html")
+      .then((response) => response.text())
+      .then((html) => {
+        $(".Contenido").innerHTML = html;
+        document.title = "Historial";
+      })
+      .catch((error) => {
+        alert("Error al cargar el contenido: " + error);
+      });
+  });
+}
+
 function CargarInicio() {
   let InicioNav = $("#InicioNav");
   InicioNav.addEventListener("click", function () {
@@ -52,3 +67,4 @@ function CargarInicio() {
 }
 cargarInventario();
 CargarInicio();
+cargarHistorial();

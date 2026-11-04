@@ -91,14 +91,12 @@ main {
 }
 
 .MenuToggle:hover #logoimg {
+    cursor: pointer;
     width: 200px;
     height: 200px;
 }
 #logoimg {
     transition: width 0.35s ease, height 0.35s ease;
-}
-.Perfil:hover{
-    cursor: pointer;
 }
 .Perfil {
     position: relative;
