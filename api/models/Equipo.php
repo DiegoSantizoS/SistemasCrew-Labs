@@ -30,7 +30,11 @@ class Equipo
         $nextCursor = $result ? (int)$result[count($result) - 1]['id'] : null;
         foreach ($result as &$row) unset($row['id']);
         unset($row);
-        $this->response->success("Equipos obtenidos correctamente", $result, 1, ['has_more' => $hasMore, 'next_cursor' => $nextCursor]);
+        $this->response->success("Equipos obtenidos correctamente", $result, 1, [
+            'has_more' => $hasMore,
+            'next_cursor' => $nextCursor,
+            'paginacion' => ['hayMas' => $hasMore, 'siguiente' => $nextCursor ?? 0]
+        ]);
         /*$registers = "SELECT COUNT(*) as registros FROM vwEquipo";*/
         /*$statement2 = $this->connection->prepare($registers);
         $statement2->execute();

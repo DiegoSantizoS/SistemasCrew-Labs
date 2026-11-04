@@ -27,6 +27,7 @@ START TRANSACTION;
 
 -- =====================================================================
 -- PERSONAS (12) - las personas 11 y 12 NO tienen usuario (prueba de LEFT JOIN)
+-- Test1234! contraseña de usuarios
 -- =====================================================================
 INSERT INTO Persona (Nombres_Persona, Apellidos_Persona, Telefono_Persona, Correo_Persona, Carnet_Persona) VALUES
     ('Carlos Eduardo',  'Méndez Ruiz',        '+502 5512-3401', 'cmendez@crew.edu.gt',     'ADM-0001'),   -- 1

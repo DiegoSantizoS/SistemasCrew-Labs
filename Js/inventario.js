@@ -24,20 +24,53 @@ let form = document.querySelector("#equipoForm");
 let solicitudEquipos = 0;
 let textoBusquedaActual = '';
 let cursoresBusqueda = [0];
+let paginaBusqueda = 0;
 
 // Se ejecuta después de insertar el HTML del inventario en la página.
 function inicializarBuscadorInventario() {
   const buscador = document.querySelector("#buscarEquipo");
   let temporizador;
+  cursoresBusqueda = [0];
+  paginaBusqueda = 0;
+  textoBusquedaActual = '';
   solicitudEquipos++;
   buscador.addEventListener("input", () => {
     clearTimeout(temporizador);
     // Invalida respuestas anteriores desde la primera pulsación.
     solicitudEquipos++;
+    // Cada texto nuevo comienza en la primera página de coincidencias.
+    cursoresBusqueda = [0];
+    paginaBusqueda = 0;
+    document.querySelector("#PaginacionBusqueda").replaceChildren();
     document.querySelector("#resultadoBusqueda").textContent = "Buscando…";
     // Espera a que el usuario deje de escribir antes de consultar la API.
     temporizador = setTimeout(() => ObtenerEquipos(0), 250);
   });
+}
+
+function mostrarPaginacionBusqueda(paginacion) {
+  const contenedor = document.querySelector("#PaginacionBusqueda");
+  contenedor.replaceChildren();
+  const anterior = document.createElement("button");
+  const siguiente = document.createElement("button");
+  const etiqueta = document.createElement("span");
+  anterior.type = siguiente.type = "button";
+  anterior.textContent = "Anterior";
+  siguiente.textContent = "Siguiente";
+  etiqueta.textContent = ` Página ${paginaBusqueda + 1} `;
+  anterior.disabled = paginaBusqueda === 0;
+  siguiente.disabled = !paginacion.hayMas;
+  const cambiarPagina = (destino) => {
+    anterior.disabled = siguiente.disabled = true;
+    paginaBusqueda = destino;
+    ObtenerEquipos(UltimoId);
+  };
+  anterior.addEventListener("click", () => cambiarPagina(paginaBusqueda - 1));
+  siguiente.addEventListener("click", () => {
+    cursoresBusqueda[paginaBusqueda + 1] = paginacion.siguiente;
+    cambiarPagina(paginaBusqueda + 1);
+  });
+  contenedor.append(anterior, etiqueta, siguiente);
 }
 
 //Función flecha para devolver la url de la api
@@ -95,6 +128,7 @@ async function ObtenerEquipos(IdFinal = 0) {
   if (busqueda !== textoBusquedaActual) {
     textoBusquedaActual = busqueda;
     cursoresBusqueda = [0];
+    paginaBusqueda = 0;
     if (busqueda) IdFinal = 0;
   }
   if (!busqueda) IdFinal = UltimoId;
@@ -111,34 +145,18 @@ async function ObtenerEquipos(IdFinal = 0) {
   paginacionBusqueda.hidden = !busqueda;
   try {
     // URLSearchParams codifica espacios y caracteres especiales del texto.
-    const parametros = new URLSearchParams({ ultimo: IdFinal, buscar: busqueda });
+    const parametros = new URLSearchParams({
+      ultimo: busqueda ? cursoresBusqueda[paginaBusqueda] : IdFinal,
+      buscar: busqueda
+    });
     const response = await inventoryFetch(`${URL}?${parametros}`);
     const datos = await response.json();
     if (!sigueVigente()) return;
-    paginacionBusqueda.replaceChildren();
-    if (busqueda) {
-      const anterior = document.createElement('button');
-      anterior.type = 'button';
-      anterior.textContent = 'Anterior';
-      anterior.disabled = cursoresBusqueda.length < 2;
-      anterior.addEventListener('click', () => {
-        cursoresBusqueda.pop();
-        ObtenerEquipos(cursoresBusqueda[cursoresBusqueda.length - 1]);
-      });
-      const siguiente = document.createElement('button');
-      siguiente.type = 'button';
-      siguiente.textContent = 'Siguiente';
-      siguiente.disabled = !datos.has_more;
-      siguiente.addEventListener('click', () => {
-        cursoresBusqueda.push(datos.next_cursor);
-        ObtenerEquipos(datos.next_cursor);
-      });
-      paginacionBusqueda.append(anterior, siguiente);
-    }
     const tabla = document.querySelector("#inventarioTable tbody");
     document.querySelector("#resultadoBusqueda").textContent = busqueda
       ? `${datos.data.length} equipo(s) en esta página${datos.has_more ? '; hay más resultados' : ''}.`
       : "";
+    if (busqueda) mostrarPaginacionBusqueda(datos.paginacion);
 
     //Limpiar la tabla
     tabla.innerHTML = "";
