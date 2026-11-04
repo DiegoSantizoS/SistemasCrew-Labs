@@ -6,7 +6,7 @@ PerfilImg.addEventListener("click", function () {
 });
 let $ = (doc) => document.querySelector(doc);
 let $$ = (doc) => document.querySelectorAll(doc);
-
+const historialNav = $("#HistorialNav");
 
 function cargarInventario() {
   let InventarioNav = $("#InventarioNav");
@@ -19,6 +19,8 @@ function cargarInventario() {
       .then((html) => {
         $(".Contenido").innerHTML = html;
 
+        // Conecta el buscador una vez que su campo existe en el documento.
+        inicializarBuscadorInventario();
         TablaPaginada();
         ObtenerCategorias();
         ObtenerUbicaciones();
@@ -33,6 +35,21 @@ function cargarInventario() {
         }
 
         document.title = "Inventario";
+      })
+      .catch((error) => {
+        alert("Error al cargar el contenido: " + error);
+      });
+  });
+}
+
+function cargarHistorial() {
+  historialNav.addEventListener("click", function () {
+    $(".Bienvenida").style.display = "none";
+    fetch("Sites/historial.html")
+      .then((response) => response.text())
+      .then((html) => {
+        $(".Contenido").innerHTML = html;
+        document.title = "Historial";
       })
       .catch((error) => {
         alert("Error al cargar el contenido: " + error);
@@ -77,3 +94,4 @@ function cargarPrestamos() {
 cargarInventario();
 CargarInicio();
 cargarPrestamos();
+cargarHistorial();

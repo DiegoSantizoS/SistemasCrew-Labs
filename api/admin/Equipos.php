@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../helpers/auth.php';
-//auth_admin();
+auth_admin();
 require_once(__DIR__ . "/../core/Connection.php");
 require_once(__DIR__ . "/../models/Equipo.php");
 require_once(__DIR__ . "/../core/Response.php");
@@ -21,7 +21,9 @@ switch ($method) {
             } else {
                 // Listado resumido para la tabla
                 $ultimoid = (int) ($_GET['ultimo'] ?? 0);
-                $equipo->getPreview($ultimoid);
+                // El texto de búsqueda es opcional: vacío conserva el listado por páginas.
+                $busqueda = trim($_GET['buscar'] ?? '');
+                $equipo->getPreview($ultimoid, $busqueda);
             }
         } catch (\Throwable $th) {
             error_log('Error Equipos.php: ' . $th->getMessage());

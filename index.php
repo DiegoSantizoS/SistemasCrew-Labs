@@ -16,13 +16,8 @@ $user=auth_require();
 <body>
     <nav class="MenuToggle" id="NavLinks">
 
-        <div class="Logo">
+        <div class="Logo" id="InicioNav">
             <img id="logoimg" src="Images/logo.webp" alt="Logo" width="50" height="50">
-        </div>
-
-        <div class="NavBox" id="InicioNav">
-            <img src="Images/inicio.webp" alt="Inicio" width="50" height="50">
-            <span>Inicio</span>
         </div>
 
         <div class="NavBox" id="InventarioNav">
@@ -47,12 +42,10 @@ $user=auth_require();
                 <span>Devoluciones</span>
             </div>
         </a>
-        <a href="Sites/historial.html">
-            <div class="NavBox">
+            <div class="NavBox" id="HistorialNav">
                 <img src="Images/historial.webp" alt="Historial" width="50" height="50">
                 <span>Historial</span>
             </div>
-        </a>
     </nav>
     <main>
         <div class="Perfil">
