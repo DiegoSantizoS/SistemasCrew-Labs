@@ -1,97 +1,38 @@
+// Navegación y elementos compartidos del panel.
 const PerfilImg = document.getElementById("PerfilImg");
 const PerfilNav = document.getElementById("PerfilNav");
+PerfilImg.addEventListener("click", () => PerfilNav.classList.toggle("mostrar"));
 
-PerfilImg.addEventListener("click", function () {
-  PerfilNav.classList.toggle("mostrar");
-});
-let $ = (doc) => document.querySelector(doc);
-let $$ = (doc) => document.querySelectorAll(doc);
-const historialNav = $("#HistorialNav");
+let navegacionActual = 0;
 
-function cargarInventario() {
-  let InventarioNav = $("#InventarioNav");
-
-  InventarioNav.addEventListener("click", function () {
-    $(".Bienvenida").style.display = "none";
-
-    fetch("Sites/inventario.html")
-      .then((response) => response.text())
-      .then((html) => {
-        $(".Contenido").innerHTML = html;
-
-        // Conecta el buscador una vez que su campo existe en el documento.
-        inicializarBuscadorInventario();
-        TablaPaginada();
-        ObtenerCategorias();
-        ObtenerUbicaciones();
-        ObtenerEstadosEquipo();
-        cargarModal();
-
-        // Evento para cerrar el modal de preview
-        const cerrarPreview = $("#cerrarPreview");
-
-        if (cerrarPreview) {
-          cerrarPreview.addEventListener("click", CerrarPreview);
-        }
-
-        document.title = "Inventario";
-      })
-      .catch((error) => {
-        alert("Error al cargar el contenido: " + error);
-      });
-  });
-}
-
-function cargarHistorial() {
-  historialNav.addEventListener("click", function () {
-    $(".Bienvenida").style.display = "none";
-    fetch("Sites/historial.html")
-      .then((response) => response.text())
-      .then((html) => {
-        $(".Contenido").innerHTML = html;
-        document.title = "Historial";
-      })
-      .catch((error) => {
-        alert("Error al cargar el contenido: " + error);
-      });
-  });
-}
-
-function CargarInicio() {
-  let InicioNav = $("#InicioNav");
-  InicioNav.addEventListener("click", function () {
-    $(".Contenido").innerHTML = "";
-    $(".Bienvenida").style.display = "block";
-    document.title = "Inicio";
-  });
-}
-
-function cargarPrestamos() {
-  const prestamosNav = $("#PrestamosNav");
-  prestamosNav.addEventListener("click", async function (event) {
+function conectarSeccion(id, ruta, titulo, inicializar) {
+  document.getElementById(id).addEventListener("click", async (event) => {
     event.preventDefault();
-    $(".Bienvenida").style.display = "none";
-    const contenido = $(".Contenido");
-    contenido.textContent = "Cargando préstamos…";
+    const solicitud = ++navegacionActual;
+    const contenido = document.querySelector(".Contenido");
+    document.querySelector(".Bienvenida").style.display = "none";
+    contenido.textContent = "Cargando…";
     try {
-      const response = await fetch("Sites/prestamos.html");
-      if (!response.ok) throw new Error("No se pudo cargar la página de préstamos.");
-      contenido.innerHTML = await response.text();
-      document.title = "Préstamos";
-      if (!document.querySelector('script[data-prestamos]')) {
-        const script = document.createElement("script");
-        script.src = "Js/prestamos.js";
-        script.dataset.prestamos = "true";
-        document.body.appendChild(script);
-      } else if (typeof initPrestamos === "function") {
-        initPrestamos();
-      }
+      const response = await fetch(ruta);
+      if (!response.ok) throw new Error(`No se pudo cargar ${titulo}.`);
+      const html = await response.text();
+      if (solicitud !== navegacionActual) return;
+      contenido.innerHTML = html;
+      document.title = titulo;
+      inicializar();
     } catch (error) {
-      contenido.textContent = error.message;
+      if (solicitud === navegacionActual) contenido.textContent = error.message;
     }
   });
 }
-cargarInventario();
-CargarInicio();
-cargarPrestamos();
-cargarHistorial();
+
+document.getElementById("InicioNav").addEventListener("click", () => {
+  navegacionActual++;
+  document.querySelector(".Contenido").replaceChildren();
+  document.querySelector(".Bienvenida").style.display = "block";
+  document.title = "Inicio";
+});
+
+conectarSeccion("InventarioNav", "Sites/inventario.html", "Inventario", initInventario);
+conectarSeccion("PrestamosNav", "Sites/prestamos.html", "Préstamos", initPrestamos);
+conectarSeccion("HistorialNav", "Sites/historial.html", "Historial", initHistorial);

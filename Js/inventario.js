@@ -1,3 +1,14 @@
+function initInventario() {
+  inicializarBuscadorInventario();
+  TablaPaginada();
+  ObtenerCategorias();
+  ObtenerUbicaciones();
+  ObtenerEstadosEquipo();
+  cargarModal();
+  const cerrarPreview = document.querySelector("#cerrarPreview");
+  if (cerrarPreview) cerrarPreview.addEventListener("click", CerrarPreview);
+}
+
 async function inventoryFetch(url, options = {}) {
   const headers = new Headers(options.headers || {});
   headers.set(

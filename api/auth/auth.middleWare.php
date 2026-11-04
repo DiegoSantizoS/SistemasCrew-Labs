@@ -4,27 +4,15 @@ require_once __DIR__ . '/../models/Usuario.php';
 
 function requireAuth(int|array $roles = []): array {
     header('Cache-Control: no-store');
-    $payload = auth_cookie_payload();
-    $session = auth_user();
-    if (!$payload || !$session || $payload['id'] !== (int)$session['id']) {
-        Response::error('Tu sesión venció. Inicia sesión nuevamente.', -401, 401);
-    }
-    $current = (new Usuario(new Connection()))->identity($payload['id']);
-    if (!$current || $current['estado'] !== 'Activo') {
-        unset($_SESSION['user'], $_SESSION['auth_cookie_key']);
-        auth_clear_cookie();
+    $user = auth_current_user();
+    if (!$user) {
         Response::error('Tu sesión venció. Inicia sesión nuevamente.', -401, 401);
     }
     $allowed = is_int($roles) ? [$roles] : $roles;
-    if ($allowed && !in_array((int)$current['role_id'], $allowed, true)) {
+    if ($allowed && !in_array($user['role']['id'], $allowed, true)) {
         Response::error('No tienes permiso para realizar esta acción.', -403, 403);
     }
-    return [
-        'id' => (int)$current['id'],
-        'nombre' => $current['nombre'],
-        'role' => ['id' => (int)$current['role_id'], 'name' => $current['rol']],
-        'exp' => $payload['exp']
-    ];
+    return $user;
 }
 
 function requirePermission(string $module, ?string $action = null): array {

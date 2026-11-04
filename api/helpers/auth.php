@@ -49,13 +49,32 @@ function auth_clear_cookie() {
     setcookie(auth_cookie_name(), '', auth_cookie_options(time() - 42000));
     unset($_COOKIE[auth_cookie_name()]);
 }
+function auth_current_user(): ?array {
+    $session = auth_user();
+    if (!$session) return null;
+    require_once __DIR__ . '/../models/Usuario.php';
+    $current = (new Usuario(new Connection()))->identity($session['id']);
+    if (!$current || $current['estado'] !== 'Activo') {
+        unset($_SESSION['user'], $_SESSION['auth_cookie_key']);
+        auth_clear_cookie();
+        return null;
+    }
+    $_SESSION['user'] = ['id' => (int)$current['id'], 'nombre' => $current['nombre']];
+    return [
+        'id' => (int)$current['id'],
+        'nombre' => $current['nombre'],
+        'role' => ['id' => (int)$current['role_id'], 'name' => $current['rol']],
+        'exp' => auth_cookie_payload()['exp']
+    ];
+}
 function auth_require($api = false) {
     header('Cache-Control: no-store');
-    if (!auth_user()) {
+    $user = auth_current_user();
+    if (!$user) {
         if ($api) Response::error('Tu sesión venció. Inicia sesión nuevamente.', -401, 401);
         header('Location: ' . auth_url('login.php')); exit;
     }
-    return auth_user();
+    return $user;
 }
 function auth_admin() {
     require_once __DIR__ . '/../auth/auth.middleWare.php';

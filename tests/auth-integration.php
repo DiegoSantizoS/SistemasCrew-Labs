@@ -61,6 +61,14 @@ try {
     $dash=request('index.php');expect('session persistence',$dash,200);
     expect('authenticated login redirect',request('login.php'),302);
     preg_match('/name="csrf-token" content="([a-f0-9]+)"/',$dash[1],$m);$csrf=$m[1];
+    $db->prepare("UPDATE Usuario SET Id_Estado=(SELECT Id_Estado FROM Estado_Usuario WHERE Estado_Usuario='Inactivo' LIMIT 1) WHERE Id_Usuario=?")->execute([$u['Id_Usuario']]);
+    expect('deactivated user redirected from dashboard', request('index.php'), 302);
+    expect('deactivated user can open login without redirect loop', request('login.php'), 200);
+    expect('deactivated session rejected by API', request('api/auth/me.php'), 401);
+    $db->prepare("UPDATE Usuario SET Id_Estado=(SELECT Id_Estado FROM Estado_Usuario WHERE Estado_Usuario='Activo' LIMIT 1) WHERE Id_Usuario=?")->execute([$u['Id_Usuario']]);
+    expect('reactivated user signs in again', request('api/auth/login.php', ['csrf'=>token(), 'email'=>$email, 'password'=>$d['password']]), 200);
+    $dash = request('index.php');
+    preg_match('/name="csrf-token" content="([a-f0-9]+)"/', $dash[1], $m); $csrf = $m[1];
     expect('wrong password',request('api/auth/login.php',['csrf'=>$csrf,'email'=>$email,'password'=>'wrong']),401);
     foreach (['Equipos','Categorias','Ubicaciones','Estados_Equipo','PaginasEquipos'] as $endpoint) expect('inventory read '.$endpoint,request('api/admin/'.$endpoint.'.php'),200);
     $page = expect('bounded equipment results', request('api/admin/Equipos.php?buscar=a&limit=100000'),200);

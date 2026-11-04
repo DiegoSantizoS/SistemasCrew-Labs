@@ -64,10 +64,10 @@ $user = auth_require();
 
         </div>
         <meta name="csrf-token" content="<?= htmlspecialchars(auth_token(), ENT_QUOTES, 'UTF-8') ?>">
-        <script src="Js/index.js">
-        </script>
-        <script src="Js/inventario.js">
-        </script>
+        <script src="Js/inventario.js"></script>
+        <script src="Js/prestamos.js"></script>
+        <script src="Js/historial.js"></script>
+        <script src="Js/index.js"></script>
     </main>
 </body>
 

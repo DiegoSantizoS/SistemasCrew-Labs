@@ -104,4 +104,3 @@ function initPrestamos() {
 }
 
 window.initPrestamos = initPrestamos;
-initPrestamos();
