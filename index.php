@@ -9,6 +9,7 @@ $user=auth_require();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="Styles/index.css">
+    <link rel="stylesheet" href="Styles/prestamos.css">
     <title>Sistema de Gestión de Equipos de Laboratorio</title>
 </head>
 
@@ -34,7 +35,7 @@ $user=auth_require();
                 <span>Ingresos</span>
             </div>
         </a>
-        <a href="Sites/prestamos.html">
+        <a href="Sites/prestamos.html" id="PrestamosNav">
             <div class="NavBox">
                 <img src="Images/prestamos.webp" alt="Préstamos" width="50" height="50">
                 <span>Préstamos</span>
