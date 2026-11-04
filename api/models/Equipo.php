@@ -11,13 +11,26 @@ class Equipo
         $this->response = $response;
     }
     //Función para obtener todos los equipos
-    function getPreview($ultimo = 0)
+    function getPreview($ultimo = 0, $busqueda = '')
     {
-        $query = "SELECT Codigo, Descripcion, Categoria, Estado FROM vwEquipo WHERE id > :ultimo ORDER BY id ASC limit 10 ";
+        $query = "SELECT id, Codigo, Descripcion, Categoria, Estado FROM vwEquipo WHERE id > :ultimo";
+        $parametros = ['ultimo' => $ultimo];
+        if ($busqueda !== '') {
+            $query .= " AND (LOCATE(LOWER(:codigo), LOWER(Codigo)) > 0
+                         OR LOCATE(LOWER(:descripcion), LOWER(Descripcion)) > 0)";
+            $parametros['codigo'] = $busqueda;
+            $parametros['descripcion'] = $busqueda;
+        }
+        $query .= " ORDER BY id ASC LIMIT 11";
         $statement = $this->connection->prepare($query);
-        $statement->execute(['ultimo'=>$ultimo]);
+        $statement->execute($parametros);
         $result = $statement->fetchAll(PDO::FETCH_ASSOC);
-        $this->response->success("Equipos obtenidos correctamente", $result, 1);
+        $hasMore = count($result) > 10;
+        $result = array_slice($result, 0, 10);
+        $nextCursor = $result ? (int)$result[count($result) - 1]['id'] : null;
+        foreach ($result as &$row) unset($row['id']);
+        unset($row);
+        $this->response->success("Equipos obtenidos correctamente", $result, 1, ['has_more' => $hasMore, 'next_cursor' => $nextCursor]);
         /*$registers = "SELECT COUNT(*) as registros FROM vwEquipo";*/
         /*$statement2 = $this->connection->prepare($registers);
         $statement2->execute();

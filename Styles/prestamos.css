@@ -1,0 +1,24 @@
+.prestamos-page { color: #172033; }
+.prestamos-page h1 { margin: 0 0 .5rem; }
+.prestamos-page .intro { color: #526078; margin: 0 0 1.25rem; }
+.prestamos-page .busqueda-equipos { display: block; margin-bottom: .4rem; font-weight: 600; }
+.prestamos-page #buscarEquipo { width: min(100%, 32rem); padding: .7rem .85rem; border: 1px solid #b8c4d3; border-radius: 8px; font: inherit; }
+.prestamos-page #avisoPrestamos { min-height: 1.5rem; margin: 1rem 0; color: #31516f; }
+.prestamos-page #avisoPrestamos.error { color: #a12626; }
+.prestamos-page #equiposDisponibles { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
+.prestamos-page .equipo-card { display: grid; align-content: start; gap: .75rem; padding: 1.25rem; border: 1px solid #dce3ec; border-radius: 12px; background: white; box-shadow: 0 4px 14px #23334d0d; }
+.prestamos-page .equipo-card h2 { margin: 0; font-size: 1.1rem; }
+.prestamos-page .equipo-card p { margin: 0; color: #526078; line-height: 1.5; }
+.prestamos-page .estado-disponible { justify-self: start; padding: .3rem .65rem; border-radius: 999px; background: #d9f8df; color: #17632a; font-size: .85rem; }
+.prestamos-page button { width: fit-content; border: 0; border-radius: 8px; padding: .7rem 1rem; background: #165dba; color: white; font: inherit; cursor: pointer; }
+.prestamos-page button:disabled { opacity: .6; cursor: wait; }
+.prestamos-page dialog { width: min(94vw, 34rem); border: 1px solid #dce3ec; border-radius: 12px; padding: 1.5rem; }
+.prestamos-page dialog::backdrop { background: #10182899; }
+.prestamos-page dialog h2 { margin-top: 0; }
+.prestamos-page form { display: grid; gap: .7rem; }
+.prestamos-page form label { font-weight: 600; }
+.prestamos-page form input, .prestamos-page form textarea { width: 100%; padding: .7rem; border: 1px solid #b8c4d3; border-radius: 7px; font: inherit; }
+.prestamos-page form textarea { resize: vertical; }
+.prestamos-page .acciones { display: flex; gap: .6rem; margin-top: .5rem; }
+.prestamos-page .acciones #cerrarPrestamo { background: #657286; }
+@media (max-width: 600px) { .prestamos-page #equiposDisponibles { grid-template-columns: 1fr; } }

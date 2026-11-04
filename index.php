@@ -9,19 +9,15 @@ $user=auth_require();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="Styles/index.css">
+    <link rel="stylesheet" href="Styles/prestamos.css">
     <title>Sistema de Gestión de Equipos de Laboratorio</title>
 </head>
 
 <body>
     <nav class="MenuToggle" id="NavLinks">
 
-        <div class="Logo">
+        <div class="Logo" id="InicioNav">
             <img id="logoimg" src="Images/logo.webp" alt="Logo" width="50" height="50">
-        </div>
-
-        <div class="NavBox" id="InicioNav">
-            <img src="Images/inicio.webp" alt="Inicio" width="50" height="50">
-            <span>Inicio</span>
         </div>
 
         <div class="NavBox" id="InventarioNav">
@@ -34,7 +30,7 @@ $user=auth_require();
                 <span>Ingresos</span>
             </div>
         </a>
-        <a href="Sites/prestamos.html">
+        <a href="Sites/prestamos.html" id="PrestamosNav">
             <div class="NavBox">
                 <img src="Images/prestamos.webp" alt="Préstamos" width="50" height="50">
                 <span>Préstamos</span>
@@ -46,12 +42,10 @@ $user=auth_require();
                 <span>Devoluciones</span>
             </div>
         </a>
-        <a href="Sites/historial.html">
-            <div class="NavBox">
+            <div class="NavBox" id="HistorialNav">
                 <img src="Images/historial.webp" alt="Historial" width="50" height="50">
                 <span>Historial</span>
             </div>
-        </a>
     </nav>
     <main>
         <div class="Perfil">

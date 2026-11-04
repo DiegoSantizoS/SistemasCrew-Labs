@@ -18,6 +18,9 @@ switch ($method) {
         if (isset($_GET['ultimo']) && filter_var($_GET['ultimo'], FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]) === false) {
             $response->error('Índice de página no válido.', -422, 422);
         }
+        if (isset($_GET['buscar']) && (!is_string($_GET['buscar']) || mb_strlen($_GET['buscar']) > 150)) {
+            $response->error('Búsqueda no válida. Usa hasta 150 caracteres.', -422, 422);
+        }
         try {
             $equipo = new Equipo($conection, $response);
 
@@ -27,7 +30,9 @@ switch ($method) {
             } else {
                 // Listado resumido para la tabla
                 $ultimoid = (int) ($_GET['ultimo'] ?? 0);
-                $equipo->getPreview($ultimoid);
+                // El texto de búsqueda es opcional: vacío conserva el listado por páginas.
+                $busqueda = trim($_GET['buscar'] ?? '');
+                $equipo->getPreview($ultimoid, $busqueda);
             }
         } catch (\Throwable $th) {
             error_log('Error Equipos.php: ' . $th->getMessage());

@@ -11,7 +11,7 @@ foreach ($privatePaths as $path) {
     if ($status !== 403) throw new RuntimeException('Private path not denied: ' . $path . ', HTTP ' . $status);
     echo 'PASS private path HTTP 403: ' . $path . PHP_EOL;
 }
-foreach (['Equipos', 'Categorias', 'Ubicaciones', 'Estados_Equipo', 'PaginasEquipos'] as $endpoint) {
+foreach (['Equipos', 'Categorias', 'Ubicaciones', 'Estados_Equipo', 'PaginasEquipos', 'Prestamos'] as $endpoint) {
     foreach (['GET', 'POST', 'PUT', 'DELETE'] as $method) {
         $request = curl_init($base . 'api/admin/' . $endpoint . '.php');
         curl_setopt_array($request, [CURLOPT_RETURNTRANSFER => true, CURLOPT_CUSTOMREQUEST => $method, CURLOPT_FOLLOWLOCATION => false, CURLOPT_TIMEOUT => 10]);

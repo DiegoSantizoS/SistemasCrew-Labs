@@ -65,6 +65,11 @@ try {
     foreach (['Equipos','Categorias','Ubicaciones','Estados_Equipo','PaginasEquipos'] as $endpoint) expect('inventory read '.$endpoint,request('api/admin/'.$endpoint.'.php'),200);
     $page = expect('bounded equipment results', request('api/admin/Equipos.php?buscar=a&limit=100000'),200);
     if (count($page['data']) > 10) throw new RuntimeException('Unbounded inventory response');
+    if ($page['has_more']) {
+        $next = expect('search cursor pagination',request('api/admin/Equipos.php?buscar=a&ultimo=' . $page['next_cursor']),200);
+        if (count($next['data']) > 10 || array_intersect(array_column($page['data'],'Codigo'),array_column($next['data'],'Codigo'))) throw new RuntimeException('Invalid search pagination');
+    }
+    expect('array search rejected',request('api/admin/Equipos.php?buscar[]=a'),422);
     expect('negative page rejected',request('api/admin/Equipos.php?ultimo=-1'),422);
     expect('array code rejected',request('api/admin/Equipos.php?codigo[]=a'),422);
     expect('ordinary user cannot write',request('api/admin/Equipos.php',[]),403);
@@ -72,6 +77,7 @@ try {
     $temporaryRole = (int)$db->lastInsertId();
     $db->prepare('UPDATE Usuario SET Id_Rol=? WHERE Id_Usuario=?')->execute([$temporaryRole,$u['Id_Usuario']]);
     expect('role without assigned permission cannot read', request('api/admin/Equipos.php'), 403);
+    expect('role without loan permission cannot read', request('api/admin/Prestamos.php'), 403);
     expect('identity remains valid without module permission', request('api/auth/me.php'), 200);
     $db->prepare("UPDATE Usuario SET Id_Rol=(SELECT Id_Rol FROM Rol WHERE Nombre_Rol='Encargado' LIMIT 1) WHERE Id_Usuario=?")->execute([$u['Id_Usuario']]);
     expect('encargado cannot delete', request('api/admin/Equipos.php?codigo=nonexistent',null,'DELETE',['X-CSRF-Token: '.$csrf]),403);
