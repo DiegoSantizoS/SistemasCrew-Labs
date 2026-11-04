@@ -382,6 +382,11 @@ END //;
 DELIMITER ;
 -- Fin de Triggers de la tabla de Equipo
 
+-- Procedimientos almacenados y funciones que se pueden agregar aquí según sea necesario
+DELIMITER //
+
+    
+DELIMITER ;
 
 -- =====================================================================
 -- DATOS SEMILLA MÍNIMOS PARA ARRANCAR EL SISTEMA

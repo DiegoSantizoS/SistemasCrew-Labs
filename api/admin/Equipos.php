@@ -20,9 +20,18 @@ switch ($method) {
                 $equipo->getAll(trim($_GET['codigo']));
             } else {
                 // Listado resumido para la tabla
-                $ultimoid = (int) ($_GET['ultimo'] ?? 0);
+                // Valida también solicitudes directas que no pasan por el formulario.
+                $ultimoid = filter_var($_GET['ultimo'] ?? 0, FILTER_VALIDATE_INT, [
+                    'options' => ['min_range' => 0]
+                ]);
+                if ($ultimoid === false || !is_string($_GET['buscar'] ?? '')) {
+                    $response->error("Parámetros de búsqueda no válidos", 2006, 422);
+                }
                 // El texto de búsqueda es opcional: vacío conserva el listado por páginas.
                 $busqueda = trim($_GET['buscar'] ?? '');
+                if (mb_strlen($busqueda) > 100) {
+                    $response->error("La búsqueda admite hasta 100 caracteres", 2006, 422);
+                }
                 $equipo->getPreview($ultimoid, $busqueda);
             }
         } catch (\Throwable $th) {

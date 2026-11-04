@@ -57,7 +57,7 @@
   <!-- Campo de búsqueda y mensaje accesible con el resultado de la consulta. -->
   <div class="buscador-inventario">
     <label for="buscarEquipo">Buscar equipos</label>
-    <input type="search" id="buscarEquipo" placeholder="Escribe un código o descripción" aria-controls="inventarioTable" />
+    <input type="search" id="buscarEquipo" maxlength="100" placeholder="Escribe un código o descripción" aria-controls="inventarioTable" />
     <p id="resultadoBusqueda" role="status" aria-live="polite"></p>
   </div>
   <table id="inventarioTable">
@@ -73,4 +73,5 @@
     <tbody></tbody>
   </table>
   <div id="Paginacion"></div>
+  <div id="PaginacionBusqueda" hidden aria-label="Páginas de resultados de búsqueda"></div>
 </div>

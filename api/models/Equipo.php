@@ -13,15 +13,17 @@ class Equipo
     //Función para obtener todos los equipos
     function getPreview($ultimo = 0, $busqueda = '')
     {
-        $query = "SELECT Codigo, Descripcion, Categoria, Estado FROM vwEquipo";
+        $query = "SELECT id, Codigo, Descripcion, Categoria, Estado FROM vwEquipo";
         $parametros = ['ultimo' => $ultimo];
         if ($busqueda !== '') {
             // Busca coincidencias parciales en cualquiera de los dos campos.
             // LOCATE busca texto literal, incluso si contiene % o _.
-            $query .= " WHERE LOCATE(LOWER(:codigo), LOWER(Codigo)) > 0
-                         OR LOCATE(LOWER(:descripcion), LOWER(Descripcion)) > 0
-                         ORDER BY id ASC";
-            $parametros = ['codigo' => $busqueda, 'descripcion' => $busqueda];
+            // El cursor evita saltos mediante OFFSET y el límite impide respuestas masivas.
+            $query .= " WHERE id > :ultimo AND (
+                         LOCATE(LOWER(:codigo), LOWER(Codigo)) > 0
+                         OR LOCATE(LOWER(:descripcion), LOWER(Descripcion)) > 0)
+                         ORDER BY id ASC LIMIT 11";
+            $parametros = ['ultimo' => $ultimo, 'codigo' => $busqueda, 'descripcion' => $busqueda];
         } else {
             $query .= " WHERE id > :ultimo ORDER BY id ASC LIMIT 10";
         }
@@ -29,7 +31,17 @@ class Equipo
         $statement = $this->connection->prepare($query);
         $statement->execute($parametros);
         $result = $statement->fetchAll(PDO::FETCH_ASSOC);
-        $this->response->success("Equipos obtenidos correctamente", $result, 1);
+        // Se consulta un registro extra solo para saber si existe otra página.
+        $hayMas = $busqueda !== '' && count($result) > 10;
+        $result = array_slice($result, 0, 10);
+        $siguiente = $result ? (int) $result[count($result) - 1]['id'] : 0;
+        foreach ($result as &$fila) {
+            unset($fila['id']);
+        }
+        unset($fila);
+        $this->response->success("Equipos obtenidos correctamente", $result, 1, [
+            'paginacion' => ['hayMas' => $hayMas, 'siguiente' => $siguiente]
+        ]);
         /*$registers = "SELECT COUNT(*) as registros FROM vwEquipo";*/
         /*$statement2 = $this->connection->prepare($registers);
         $statement2->execute();
