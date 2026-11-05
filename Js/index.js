@@ -35,4 +35,5 @@ document.getElementById("InicioNav").addEventListener("click", () => {
 
 conectarSeccion("InventarioNav", "Sites/inventario.html", "Inventario", initInventario);
 conectarSeccion("PrestamosNav", "Sites/prestamos.html", "Préstamos", initPrestamos);
+conectarSeccion("DevolucionesNav", "Sites/devoluciones.html", "Devoluciones", initDevoluciones);
 conectarSeccion("HistorialNav", "Sites/historial.html", "Historial", initHistorial);

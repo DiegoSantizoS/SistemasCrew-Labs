@@ -10,6 +10,7 @@ $user = auth_require();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="Styles/index.css">
     <link rel="stylesheet" href="Styles/prestamos.css">
+    <link rel="stylesheet" href="Styles/devoluciones.css">
     <title>Sistema de Gestión de Equipos de Laboratorio</title>
 </head>
 
@@ -33,12 +34,10 @@ $user = auth_require();
             <span>Préstamos</span>
         </div>
 
-        <a href="Sites/devoluciones.html">
-            <div class="NavBox">
+        <div class="NavBox" id="DevolucionesNav">
                 <img src="Images/devoluciones.webp" alt="Devoluciones" width="50" height="50">
                 <span>Devoluciones</span>
-            </div>
-        </a>
+        </div>
         <div class="NavBox" id="HistorialNav">
             <img src="Images/historial.webp" alt="Historial" width="50" height="50">
             <span>Historial</span>
@@ -66,6 +65,7 @@ $user = auth_require();
         <meta name="csrf-token" content="<?= htmlspecialchars(auth_token(), ENT_QUOTES, 'UTF-8') ?>">
         <script src="Js/inventario.js"></script>
         <script src="Js/prestamos.js"></script>
+        <script src="Js/devoluciones.js"></script>
         <script src="Js/historial.js"></script>
         <script src="Js/index.js"></script>
     </main>
