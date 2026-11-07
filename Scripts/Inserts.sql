@@ -61,22 +61,38 @@ INSERT INTO Usuario (Id_Persona, Nombre_Usuario, Contrasena_Usuario, Id_Rol, Id_
     (10, 'preyes',     '$2b$10$ICAnUVr6Z4fxxIUrhEfIFuLmSZLT7XyOe8jAj/pIwm2WTXq1jEWWC', 3, 3);  -- 10 Bloqueado
 
 -- =====================================================================
--- PERMISOS (RBAC): todas las combinaciones Acción x Módulo (5 x 4 = 20)
+-- PERMISOS (RBAC): todas las combinaciones Accion x Modulo
 -- =====================================================================
+-- Modulo independiente para controlar el acceso a devoluciones.
+INSERT INTO Modulo (Nombre_Modulo)
+SELECT 'Devoluciones'
+WHERE NOT EXISTS (
+    SELECT 1 FROM Modulo WHERE Nombre_Modulo = 'Devoluciones'
+);
+
+-- Conserva los permisos que ya creo el script de la base de datos.
 INSERT INTO Permiso (Id_Accion, Id_Modulo)
 SELECT a.Id_Accion, m.Id_Modulo
 FROM Modulo m
 CROSS JOIN Accion a
+WHERE NOT EXISTS (
+    SELECT 1 FROM Permiso p
+    WHERE p.Id_Accion = a.Id_Accion AND p.Id_Modulo = m.Id_Modulo
+)
 ORDER BY m.Id_Modulo, a.Id_Accion;
 
--- Administrador: todos los permisos
+-- Administrador: todos los permisos, incluyendo Devoluciones.
 INSERT INTO Rol_Permiso (Id_Rol, Id_Permiso)
 SELECT r.Id_Rol, p.Id_Permiso
 FROM Rol r
 CROSS JOIN Permiso p
-WHERE r.Nombre_Rol = 'Administrador';
+WHERE r.Nombre_Rol = 'Administrador'
+  AND NOT EXISTS (
+      SELECT 1 FROM Rol_Permiso rp
+      WHERE rp.Id_Rol = r.Id_Rol AND rp.Id_Permiso = p.Id_Permiso
+  );
 
--- Encargado: gestiona equipos y préstamos (incluye Autorizar), consulta usuarios y reportes
+-- Encargado: gestiona equipos y prestamos, consulta usuarios y reportes.
 INSERT INTO Rol_Permiso (Id_Rol, Id_Permiso)
 SELECT r.Id_Rol, p.Id_Permiso
 FROM Rol r
@@ -84,11 +100,24 @@ CROSS JOIN Permiso p
 JOIN Modulo m ON m.Id_Modulo = p.Id_Modulo
 JOIN Accion a ON a.Id_Accion = p.Id_Accion
 WHERE r.Nombre_Rol = 'Encargado'
-  AND (   (m.Nombre_Modulo = 'Equipos'   AND a.Nombre_Accion IN ('Crear','Leer','Actualizar'))
+  AND (   (m.Nombre_Modulo = 'Equipos' AND a.Nombre_Accion IN ('Crear','Leer','Actualizar'))
        OR (m.Nombre_Modulo = 'Prestamos' AND a.Nombre_Accion IN ('Crear','Leer','Actualizar','Autorizar'))
-       OR (m.Nombre_Modulo IN ('Usuarios','Reportes') AND a.Nombre_Accion = 'Leer'));
+       OR (m.Nombre_Modulo IN ('Usuarios','Reportes') AND a.Nombre_Accion = 'Leer'))
+  AND NOT EXISTS (
+      SELECT 1 FROM Rol_Permiso rp
+      WHERE rp.Id_Rol = r.Id_Rol AND rp.Id_Permiso = p.Id_Permiso
+  );
 
--- Usuario: consulta equipos y solicita/consulta sus préstamos
+-- Retira el acceso a inventario que pudo asignar el script inicial.
+DELETE rp
+FROM Rol_Permiso rp
+JOIN Rol r ON r.Id_Rol = rp.Id_Rol
+JOIN Permiso p ON p.Id_Permiso = rp.Id_Permiso
+JOIN Modulo m ON m.Id_Modulo = p.Id_Modulo
+WHERE r.Nombre_Rol = 'Usuario'
+  AND m.Nombre_Modulo = 'Equipos';
+
+-- Usuario: solicita y consulta prestamos, sin acceso a inventario.
 INSERT INTO Rol_Permiso (Id_Rol, Id_Permiso)
 SELECT r.Id_Rol, p.Id_Permiso
 FROM Rol r
@@ -96,8 +125,12 @@ CROSS JOIN Permiso p
 JOIN Modulo m ON m.Id_Modulo = p.Id_Modulo
 JOIN Accion a ON a.Id_Accion = p.Id_Accion
 WHERE r.Nombre_Rol = 'Usuario'
-  AND (   (m.Nombre_Modulo = 'Equipos'   AND a.Nombre_Accion = 'Leer')
-       OR (m.Nombre_Modulo = 'Prestamos' AND a.Nombre_Accion IN ('Crear','Leer')));
+  AND m.Nombre_Modulo = 'Prestamos'
+  AND a.Nombre_Accion IN ('Crear','Leer')
+  AND NOT EXISTS (
+      SELECT 1 FROM Rol_Permiso rp
+      WHERE rp.Id_Rol = r.Id_Rol AND rp.Id_Permiso = p.Id_Permiso
+  );
 
 -- =====================================================================
 -- CATEGORÍAS (8) - la 8 está inactiva

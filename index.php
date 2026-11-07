@@ -1,6 +1,12 @@
 <?php
 require_once __DIR__ . '/api/helpers/auth.php';
+require_once __DIR__ . '/api/models/Usuario.php';
 $user = auth_require();
+$usuarioModelo = new Usuario(new Connection());
+$puedeVerInventario = $usuarioModelo->hasPermission($user['id'], 'Equipos', 'Leer');
+$puedeVerPrestamos = $usuarioModelo->hasPermission($user['id'], 'Prestamos', 'Leer');
+$puedeVerDevoluciones = $usuarioModelo->hasPermission($user['id'], 'Devoluciones', 'Leer');
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -21,23 +27,29 @@ $user = auth_require();
             <img id="logoimg" src="Images/logo.webp" alt="Logo" width="50" height="50">
         </div>
 
-        <div class="NavBox" id="InventarioNav">
-            <img src="Images/inventario.webp" alt="Inventario" width="50" height="50">
-            <span>Inventario</span>
-        </div>
+        <?php if ($puedeVerInventario): ?>
+            <div class="NavBox" id="InventarioNav">
+                <img src="Images/inventario.webp"
+                    alt="Inventario" width="50" height="50">
+                <span>Inventario</span>
+            </div>
+        <?php endif; ?>
         <div class="NavBox">
             <img src="Images/Ingresos.webp" alt="Ingresos" width="50" height="50">
             <span>Ingresos</span>
         </div>
-        <div class="NavBox" id="PrestamosNav">
-            <img src="Images/prestamos.webp" alt="Préstamos" width="50" height="50">
-            <span>Préstamos</span>
-        </div>
-
-        <div class="NavBox" id="DevolucionesNav">
+        <?php if ($puedeVerPrestamos): ?>
+            <div class="NavBox" id="PrestamosNav">
+                <img src="Images/prestamos.webp" alt="Préstamos" width="50" height="50">
+                <span>Préstamos</span>
+            </div>
+        <?php endif; ?>
+        <?php if ($puedeVerDevoluciones): ?>
+            <div class="NavBox" id="DevolucionesNav">
                 <img src="Images/devoluciones.webp" alt="Devoluciones" width="50" height="50">
                 <span>Devoluciones</span>
-        </div>
+            </div>
+        <?php endif; ?>
         <div class="NavBox" id="HistorialNav">
             <img src="Images/historial.webp" alt="Historial" width="50" height="50">
             <span>Historial</span>
@@ -63,11 +75,11 @@ $user = auth_require();
 
         </div>
         <meta name="csrf-token" content="<?= htmlspecialchars(auth_token(), ENT_QUOTES, 'UTF-8') ?>">
-        <script src="Js/inventario.js"></script>
-        <script src="Js/prestamos.js"></script>
-        <script src="Js/devoluciones.js"></script>
-        <script src="Js/historial.js"></script>
-        <script src="Js/index.js"></script>
+        <script src="Js/inventario.js?v=<?= filemtime(__DIR__ . '/Js/inventario.js') ?>"></script>
+        <script src="Js/prestamos.js?v=<?= filemtime(__DIR__ . '/Js/prestamos.js') ?>"></script>
+        <script src="Js/devoluciones.js?v=<?= filemtime(__DIR__ . '/Js/devoluciones.js') ?>"></script>
+        <script src="Js/historial.js?v=<?= filemtime(__DIR__ . '/Js/historial.js') ?>"></script>
+        <script src="Js/index.js?v=<?= filemtime(__DIR__ . '/Js/index.js') ?>"></script>
     </main>
 </body>
 
