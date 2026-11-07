@@ -6,6 +6,8 @@ PerfilImg.addEventListener("click", () => PerfilNav.classList.toggle("mostrar"))
 let navegacionActual = 0;
 
 function conectarSeccion(id, ruta, titulo, inicializar) {
+  const elemento = document.getElementById(id);
+  if (!elemento) return;
   document.getElementById(id).addEventListener("click", async (event) => {
     event.preventDefault();
     const solicitud = ++navegacionActual;
