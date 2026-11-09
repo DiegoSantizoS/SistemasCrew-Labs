@@ -10,6 +10,12 @@
     <p id="equipoSeleccionado"></p>
     <form id="formPrestamo">
       <input type="hidden" name="equipo_id" />
+      <div id="selectorUsuarioPrestamo" hidden>
+        <label for="usuarioPrestamo">Asignar préstamo al usuario</label>
+        <select id="usuarioPrestamo" name="usuario_id" disabled>
+          <option value="">Selecciona un usuario activo</option>
+        </select>
+      </div>
       <label for="fechaVencimiento">Fecha prevista de devolución</label>
       <input id="fechaVencimiento" type="date" name="fecha_vencimiento" required />
       <label for="motivoPrestamo">Motivo del préstamo</label>

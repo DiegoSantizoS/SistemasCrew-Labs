@@ -20,7 +20,11 @@ if ($method === 'GET') {
                                   CONCAT(per.Nombres_Persona, ' ', per.Apellidos_Persona) AS usuario,
                                   d.Fecha_Devolucion AS fecha_devolucion,
                                   er.Nombre_Estado_Equipo AS estado_retorno,
-                                  d.Observaciones AS observaciones
+                                  d.Observaciones AS observaciones,
+                                  GREATEST(DATEDIFF(CURDATE(), DATE(p.vencimiento_fecha_prestamo)), 0) AS dias_retraso,
+                                  d.Multa_Prestamo AS multa_aplicada,
+                                  tm.id_tasa AS tasa_multa_id,
+                                  COALESCE(tm.Monto, 0) AS multa_estimada
                            FROM Prestamo p
                            JOIN Estado_Prestamo ep ON ep.id_estado_prestamo=p.id_estado_prestamo
                            JOIN Detalle_Prestamo d ON d.Id_Prestamo=p.Id_Prestamo
@@ -30,6 +34,15 @@ if ($method === 'GET') {
                            JOIN Categoria c ON c.Id_Categoria=e.Id_Categoria
                            JOIN Ubicacion u ON u.Id_Ubicacion=e.Id_Ubicacion
                            LEFT JOIN Estado_Equipo er ON er.id_estado_Equipo=d.Id_Estado_Retorno
+                           LEFT JOIN Tasa_Multa tm ON tm.id_tasa=(
+                             SELECT t.id_tasa FROM Tasa_Multa t
+                             WHERE t.Activo=1
+                               AND (t.Id_Categoria=e.Id_Categoria OR t.Id_Categoria IS NULL)
+                               AND t.dias_min <= GREATEST(DATEDIFF(CURDATE(), DATE(p.vencimiento_fecha_prestamo)), 0)
+                               AND (t.dias_max IS NULL OR t.dias_max >= GREATEST(DATEDIFF(CURDATE(), DATE(p.vencimiento_fecha_prestamo)), 0))
+                             ORDER BY CASE WHEN t.Id_Categoria=e.Id_Categoria THEN 0 ELSE 1 END, t.dias_min DESC
+                             LIMIT 1
+                           )
                            " . ($esAdmin ? '' : 'WHERE p.Id_Usuario=?') . "
                            ORDER BY p.emision_fecha_prestamo DESC, d.Id_Detalle DESC");
         $q->execute($esAdmin ? [] : [$user['id']]);
@@ -55,7 +68,8 @@ if (!$detalleId || !is_string($estadoRetorno) || !in_array($estadoRetorno, ['dis
 try {
     $db->beginTransaction();
     $q = $db->prepare("SELECT d.Id_Detalle, d.Id_Prestamo, d.Id_Equipo, d.Id_Estado_Salida,
-                              p.Id_Usuario, p.id_estado_prestamo, e.Codigo_Equipo
+                              p.Id_Usuario, p.id_estado_prestamo, p.vencimiento_fecha_prestamo,
+                              e.Codigo_Equipo, e.Id_Categoria
                        FROM Detalle_Prestamo d
                        JOIN Prestamo p ON p.Id_Prestamo=d.Id_Prestamo
                        JOIN Equipo e ON e.Id_Equipo=d.Id_Equipo
@@ -76,8 +90,25 @@ try {
     $idEstado = $q->fetchColumn();
     if (!$idEstado) throw new RuntimeException('No está configurado el estado solicitado para el equipo.');
 
-    $q = $db->prepare('UPDATE Detalle_Prestamo SET Id_Estado_Retorno=?, Fecha_Devolucion=NOW(), Observaciones=? WHERE Id_Detalle=? AND Fecha_Devolucion IS NULL');
-    $q->execute([$idEstado, $observaciones ?: null, $detalleId]);
+    $q = $db->prepare('SELECT GREATEST(DATEDIFF(CURDATE(), DATE(?)), 0)');
+    $q->execute([$detalle['vencimiento_fecha_prestamo']]);
+    $diasRetraso = (int)$q->fetchColumn();
+    $tasaMultaId = null;
+    $multa = '0.00';
+    if ($diasRetraso > 0) {
+        $q = $db->prepare('SELECT id_tasa, Monto FROM Tasa_Multa WHERE Activo=1 AND (Id_Categoria=? OR Id_Categoria IS NULL) AND dias_min<=? AND (dias_max IS NULL OR dias_max>=?) ORDER BY CASE WHEN Id_Categoria=? THEN 0 ELSE 1 END, dias_min DESC LIMIT 1');
+        $q->execute([$detalle['Id_Categoria'], $diasRetraso, $diasRetraso, $detalle['Id_Categoria']]);
+        $tasa = $q->fetch(PDO::FETCH_ASSOC);
+        if (!$tasa) {
+            $db->rollBack();
+            Response::error('No hay una tarifa de multa activa para esta categoría y cantidad de días de retraso.', -409, 409);
+        }
+        $tasaMultaId = $tasa['id_tasa'];
+        $multa = $tasa['Monto'];
+    }
+
+    $q = $db->prepare('UPDATE Detalle_Prestamo SET Id_Estado_Retorno=?, Fecha_Devolucion=NOW(), Id_Tasa_Multa=?, Multa_Prestamo=?, Observaciones=? WHERE Id_Detalle=? AND Fecha_Devolucion IS NULL');
+    $q->execute([$idEstado, $tasaMultaId, $multa, $observaciones ?: null, $detalleId]);
     if ($q->rowCount() !== 1) throw new RuntimeException('El detalle ya fue procesado.');
     $q = $db->prepare('UPDATE Equipo SET Id_Estado_Equipo=? WHERE Id_Equipo=?');
     $q->execute([$idEstado, $detalle['Id_Equipo']]);
@@ -91,11 +122,13 @@ try {
         $q->execute([$idDevuelto, $detalle['Id_Prestamo']]);
     }
 
-    $observacionHistorial = 'Estado de retorno: ' . $nombreEstado . ($observaciones ? '. ' . $observaciones : '');
+    $observacionHistorial = 'Estado de retorno: ' . $nombreEstado;
+    if ($diasRetraso > 0) $observacionHistorial .= '. Multa aplicada Q' . number_format((float)$multa, 2, '.', '') . ' por ' . $diasRetraso . ' día(s) de retraso';
+    if ($observaciones) $observacionHistorial .= '. ' . $observaciones;
     $q = $db->prepare("INSERT INTO Historial (Id_Usuario, Id_Prestamo, Id_Equipo, Accion_Historial, Observacion) VALUES (?, ?, ?, 'Devolución registrada', ?)");
     $q->execute([$user['id'], $detalle['Id_Prestamo'], $detalle['Id_Equipo'], $observacionHistorial]);
     $db->commit();
-    Response::success('Devolución registrada correctamente.', ['codigo' => $detalle['Codigo_Equipo']], 1);
+    Response::success('Devolución registrada correctamente.', ['codigo' => $detalle['Codigo_Equipo'], 'dias_retraso' => $diasRetraso, 'multa' => $multa], 1);
 } catch (Throwable $e) {
     if ($db->inTransaction()) $db->rollBack();
     error_log('Error Devoluciones.php POST: ' . $e->getMessage());

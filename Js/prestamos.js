@@ -9,6 +9,7 @@ function initPrestamos() {
   form.dataset.inicializado = "true";
   let csrf = "";
   let equiposDisponibles = [];
+  let esAdmin = false;
 
   async function pedir(options = {}) {
     const headers = new Headers(options.headers || {});
@@ -40,7 +41,7 @@ function initPrestamos() {
     estado.textContent = equipo.Estado;
     const boton = document.createElement("button");
     boton.type = "button";
-    boton.textContent = "Solicitar préstamo";
+    boton.textContent = esAdmin ? "Asignar préstamo" : "Solicitar préstamo";
     boton.addEventListener("click", () => {
       form.reset();
       form.elements.equipo_id.value = equipo.Id_Equipo;
@@ -57,6 +58,23 @@ function initPrestamos() {
     try {
       const result = await pedir();
       csrf = result.csrf;
+      esAdmin = result.es_admin === true;
+      const selectorContenedor = document.querySelector("#selectorUsuarioPrestamo");
+      const selectorUsuario = document.querySelector("#usuarioPrestamo");
+      selectorContenedor.hidden = !esAdmin;
+      selectorUsuario.disabled = !esAdmin;
+      selectorUsuario.required = esAdmin;
+      selectorUsuario.replaceChildren(new Option("Selecciona un usuario activo", ""));
+      document.querySelector("#tituloFormulario").textContent = esAdmin ? "Asignar préstamo" : "Solicitar préstamo";
+      form.querySelector('button[type="submit"]').textContent = esAdmin ? "Asignar préstamo" : "Enviar solicitud";
+      if (esAdmin) {
+        result.usuarios.forEach(usuario => {
+          const option = document.createElement("option");
+          option.value = usuario.id;
+          option.textContent = `${usuario.nombre} (@${usuario.usuario})`;
+          selectorUsuario.appendChild(option);
+        });
+      }
       equiposDisponibles = result.data;
       mostrarFiltrados();
     } catch (error) {
