@@ -2,11 +2,18 @@
   <h1>Mis préstamos</h1>
   <p class="intro-devoluciones">Consulta los equipos que tienes prestados y registra su devolución.</p>
   <p id="avisoDevoluciones" role="status" aria-live="polite">Cargando tus préstamos…</p>
+  <section id="seccionVencidos" aria-labelledby="tituloVencidos" hidden>
+    <h2 id="tituloVencidos">Préstamos vencidos · multa aplicable</h2>
+    <p class="intro-devoluciones">La multa se calcula con la tarifa activa por categoría y días de retraso; se guarda al registrar la devolución.</p>
+    <div id="listaVencidos"></div>
+  </section>
+  <h2 id="tituloListaDevoluciones">Mis préstamos</h2>
   <section id="listaDevoluciones" aria-label="Mis equipos prestados"></section>
 
   <dialog id="modalDevolucion" aria-labelledby="tituloDevolucion">
     <h2 id="tituloDevolucion">Registrar devolución</h2>
     <p id="equipoDevolucion"></p>
+    <p id="resumenMulta" class="resumen-multa" hidden></p>
     <form id="formDevolucion">
       <input type="hidden" name="detalle_id">
       <label for="estadoRetorno">Estado en que devuelves el equipo</label>

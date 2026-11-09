@@ -7,6 +7,7 @@ require_once __DIR__ . '/../helpers/helpers.php';
 $user = requirePermission('Prestamos');
 $db = new Connection();
 $method = $_SERVER['REQUEST_METHOD'];
+$esAdmin = $user['role']['name'] === 'Administrador';
 
 if ($method === 'GET') {
     try {
@@ -21,7 +22,19 @@ if ($method === 'GET') {
                 WHERE ee.Nombre_Estado_Equipo='Disponible'
                 ORDER BY e.Codigo_Equipo";
         $equipos = $db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
-        Response::success('Equipos disponibles obtenidos correctamente.', $equipos, 1, ['csrf' => auth_token()]);
+        $extra = ['csrf' => auth_token(), 'es_admin' => $esAdmin, 'usuarios' => []];
+        if ($esAdmin) {
+            $usuarios = $db->query("SELECT u.Id_Usuario AS id,
+                                           CONCAT(p.Nombres_Persona, ' ', p.Apellidos_Persona) AS nombre,
+                                           u.Nombre_Usuario AS usuario
+                                    FROM Usuario u
+                                    JOIN Persona p ON p.Id_Persona=u.Id_Persona
+                                    JOIN Estado_Usuario eu ON eu.Id_Estado=u.Id_Estado
+                                    WHERE eu.Estado_Usuario='Activo'
+                                    ORDER BY p.Apellidos_Persona, p.Nombres_Persona")->fetchAll(PDO::FETCH_ASSOC);
+            $extra['usuarios'] = $usuarios;
+        }
+        Response::success('Equipos disponibles obtenidos correctamente.', $equipos, 1, $extra);
     } catch (Throwable $e) {
         error_log('Error Prestamos.php GET: ' . $e->getMessage());
         Response::error('No se pudieron obtener los equipos disponibles.', -500, 500);
@@ -32,6 +45,17 @@ if ($method !== 'POST') Response::error('Método no permitido.', -405, 405);
 auth_csrf($_SERVER['HTTP_X_CSRF_TOKEN'] ?? null);
 $data = leerBody();
 $equipoId = filter_var($data['equipo_id'] ?? null, FILTER_VALIDATE_INT);
+$usuarioId = $user['id'];
+if ($esAdmin) {
+    $usuarioElegido = filter_var($data['usuario_id'] ?? null, FILTER_VALIDATE_INT);
+    if (!$usuarioElegido || $usuarioElegido < 1) {
+        Response::error('Selecciona el usuario al que se asignará el préstamo.', -422, 422);
+    }
+    $q = $db->prepare("SELECT 1 FROM Usuario u JOIN Estado_Usuario eu ON eu.Id_Estado=u.Id_Estado WHERE u.Id_Usuario=? AND eu.Estado_Usuario='Activo'");
+    $q->execute([$usuarioElegido]);
+    if (!$q->fetchColumn()) Response::error('El usuario seleccionado no existe o no está activo.', -422, 422);
+    $usuarioId = (int)$usuarioElegido;
+}
 $fecha = trim((string)($data['fecha_vencimiento'] ?? ''));
 $motivo = trim((string)($data['motivo'] ?? ''));
 if (!$equipoId || !$fecha || strlen($motivo) > 500) Response::error('Completa una fecha válida y un motivo de hasta 500 caracteres.', -422, 422);
@@ -51,7 +75,7 @@ try {
     $estadoEquipoPrestado = $db->query("SELECT id_estado_Equipo FROM Estado_Equipo WHERE Nombre_Estado_Equipo='Prestado' ORDER BY id_estado_Equipo LIMIT 1")->fetchColumn();
     if (!$estadoPrestamo || !$estadoEquipoPrestado) throw new RuntimeException('Falta configurar el estado Activo del préstamo o Prestado del equipo.');
     $q = $db->prepare('INSERT INTO Prestamo (Id_Usuario, id_estado_prestamo, vencimiento_fecha_prestamo, motivo_prestamo) VALUES (?, ?, ?, ?)');
-    $q->execute([$user['id'], $estadoPrestamo, $fecha . ' 23:59:59', $motivo ?: null]);
+    $q->execute([$usuarioId, $estadoPrestamo, $fecha . ' 23:59:59', $motivo ?: null]);
     $prestamoId = (int)$db->lastInsertId();
     $q = $db->prepare('INSERT INTO Detalle_Prestamo (Id_Prestamo, Id_Equipo, Id_Estado_Salida) VALUES (?, ?, ?)');
     $q->execute([$prestamoId, $equipoId, $equipo['Id_Estado_Equipo']]);
