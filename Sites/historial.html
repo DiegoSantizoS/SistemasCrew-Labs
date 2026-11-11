@@ -1,25 +1,23 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Historial</title>
-  </head>
-  <body>
-    <main>
-      <table>
-        <thead>
-          <th>Fecha</th>
-          <th>Accion</th>
-          <th></th>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Hola</td>
-            <td>Hola</td>
-          </tr>
-        </tbody>
-      </table>
-    </main>
-  </body>
-</html>
+<main>
+  <h1 id="tituloHistorial">Mis préstamos</h1>
+  <p id="avisoHistorial" role="status"></p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Referencia</th>
+        <th id="columnaUsuarioHistorial" hidden>Usuario</th>
+        <th>Fecha</th>
+        <th>Vencimiento</th>
+        <th>Estado</th>
+        <th>Motivo</th>
+      </tr>
+    </thead>
+    <tbody id="filasHistorial"></tbody>
+  </table>
+  <nav aria-label="Paginación del historial">
+    <button type="button" id="historialAnterior" disabled>Anterior</button>
+    <span id="paginaHistorial" aria-live="polite"></span>
+    <button type="button" id="historialSiguiente" disabled>Siguiente</button>
+  </nav>
+</main>

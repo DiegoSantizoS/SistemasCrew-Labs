@@ -10,6 +10,8 @@ Sistema de gestión de equipos de laboratorio con PHP, MySQL/PDO y JavaScript, s
 4. Usa la base existente con las tablas de `Scripts/SistemasCrew.sql`. **Ese script elimina la base: no lo ejecutes sobre datos existentes.** La integración no necesita migraciones. Deben existir el rol `Usuario` y el estado `Activo`; sus IDs se resuelven por nombre. Conserva los índices únicos de correo, carnet y nombre de usuario.
 5. Abre `http://localhost/SistemasCrew-Labs/login.php`. Las cuentas existentes deben tener hashes generados con `password_hash`; no se aceptan contraseñas almacenadas en texto plano. El registro público siempre crea usuarios ordinarios. Los roles administrativos se asignan por el procedimiento administrativo de tu instalación.
 
+Para actualizar una base existente al middleware de permisos, ejecuta únicamente `Scripts/permisos-auth.sql` en esa base. Es repetible, agrega permisos sin eliminar datos ni asignaciones existentes y requiere los roles, módulos y acciones iniciales. Las instalaciones nuevas ya incluyen estas asignaciones al final de `Scripts/SistemasCrew.sql`.
+
 ## Autenticación y acceso
 
 `login.php` carga exclusivamente `Styles/login.css`, `Js/login.js` y las fuentes DM Sans locales en `fonts/`. Ofrece pestañas de acceso y registro, validación en español, navegación por teclado y controles para mostrar contraseñas.
@@ -20,7 +22,9 @@ Los POST `api/auth/login.php` y `register.php` reciben JSON y el token CSRF de l
 
 `CerrarSesion` envía un POST con CSRF a `api/auth/logout.php`, destruye la sesión, elimina su cookie y redirige al acceso. Cookies HttpOnly y SameSite Strict, Secure bajo HTTPS y ruta ajustada al directorio del proyecto; HTTP local también funciona. En un proxy HTTPS, configura Apache para reconocer HTTPS de manera confiable.
 
-Todos los endpoints `api/admin/` exigen sesión y comprueban el estado actual en MySQL. Los usuarios registrados pueden consultar el inventario; las escrituras requieren rol `Administrador` o `Encargado` y cabecera `X-CSRF-Token`. No había reglas de permisos implementadas ni permisos asignados en el esquema inicial; esta política protege las operaciones actuales de inventario. Las peticiones sin sesión reciben JSON 401 y el frontend redirige al acceso antes de interpretar el cuerpo. La API usa rutas relativas para funcionar en subdirectorios y bajo HTTPS.
+Todos los endpoints `api/admin/` exigen sesión y permisos por módulo y acción mediante `Rol_Permiso`. El panel, el login y la API consultan el estado actual en MySQL; una cuenta desactivada pierde la sesión. Las páginas redirigen al login y la API devuelve JSON 401. Las escrituras requieren cabecera `X-CSRF-Token`. La API usa rutas relativas para funcionar en subdirectorios y bajo HTTPS.
+
+Los permisos iniciales permiten al Administrador todas las acciones de Equipos y Prestamos; al Encargado leer, crear y actualizar equipos, y leer, crear, actualizar y autorizar préstamos; al Usuario leer equipos y leer y crear préstamos. Estos permisos no implementan operaciones que todavía no existen en los endpoints. Los roles adicionales necesitan asignaciones explícitas. El script conserva cualquier permiso previo, por lo que no revoca accesos personalizados.
 
 ## Verificación
 

@@ -415,3 +415,22 @@ main {
     transform: none;
   }
 }
+
+.Contenido:empty {
+    display: none;
+}
+
+.opciones-usuario {
+    display: none;
+    margin-top: 0.75rem;
+}
+
+.opciones-usuario.mostrar {
+    display: block;
+}
+
+.sesion .nombre-usuario {
+    margin-bottom: 0;
+    min-width: 0;
+    text-align: left;
+}

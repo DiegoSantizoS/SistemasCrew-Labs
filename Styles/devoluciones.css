@@ -1,0 +1,28 @@
+.devoluciones-page { color: #172033; }
+.devoluciones-page h1 { margin: 0 0 .5rem; }
+.devoluciones-page .intro-devoluciones { margin: 0 0 1.25rem; color: #526078; }
+.devoluciones-page #avisoDevoluciones { min-height: 1.5rem; margin: 1rem 0; color: #31516f; }
+.devoluciones-page #listaDevoluciones { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+.devoluciones-page #listaVencidos { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+.devoluciones-page .sin-vencidos { margin: 0; color: #526078; }
+.devoluciones-page #seccionVencidos h2, .devoluciones-page #tituloListaDevoluciones { margin: 1.25rem 0 .75rem; }
+.devoluciones-page .devolucion-card { display: grid; align-content: start; gap: .8rem; padding: 1.2rem; border: 1px solid #dce3ec; border-radius: 12px; background: #fff; box-shadow: 0 4px 14px #23334d0d; }
+.devoluciones-page .devolucion-card h2 { margin: 0; font-size: 1.1rem; }
+.devoluciones-page .devolucion-card dl { display: grid; grid-template-columns: 1fr auto; gap: .45rem .7rem; margin: 0; font-size: .94rem; }
+.devoluciones-page .devolucion-card dt { color: #526078; }
+.devoluciones-page .devolucion-card dd { margin: 0; text-align: right; font-weight: 600; }
+.devoluciones-page .solicitante-devolucion { margin: 0; color: #31516f; font-weight: 600; }
+.devoluciones-page .devolucion-pendiente-admin { margin: 0; color: #805a12; }
+.devoluciones-page .multa-pendiente, .devoluciones-page .resumen-multa { margin: 0; padding: .7rem; border-radius: 8px; background: #fff1d6; color: #704b0b; font-weight: 600; }
+.devoluciones-page button { width: fit-content; border: 0; border-radius: 8px; padding: .7rem 1rem; background: #165dba; color: white; font: inherit; cursor: pointer; }
+.devoluciones-page button:disabled { opacity: .6; cursor: wait; }
+.devoluciones-page .devolucion-completada { margin: 0; padding: .65rem; border-radius: 8px; background: #eaf7ed; color: #17632a; }
+.devoluciones-page dialog { width: min(94vw, 34rem); border: 1px solid #dce3ec; border-radius: 12px; padding: 1.5rem; }
+.devoluciones-page dialog::backdrop { background: #10182899; }
+.devoluciones-page dialog h2 { margin-top: 0; }
+.devoluciones-page form { display: grid; gap: .7rem; }
+.devoluciones-page form label { font-weight: 600; }
+.devoluciones-page form select, .devoluciones-page form textarea { width: 100%; padding: .7rem; border: 1px solid #b8c4d3; border-radius: 7px; font: inherit; }
+.devoluciones-page form textarea { resize: vertical; }
+.devoluciones-page .acciones-devolucion { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .5rem; }
+.devoluciones-page .acciones-devolucion #cancelarDevolucion { background: #657286; }

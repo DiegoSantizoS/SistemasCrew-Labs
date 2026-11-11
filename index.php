@@ -1,6 +1,12 @@
 <?php
 require_once __DIR__ . '/api/helpers/auth.php';
-$usuario = auth_require();
+require_once __DIR__ . '/api/models/Usuario.php';
+$user = auth_require();
+$usuarioModelo = new Usuario(new Connection());
+$puedeVerInventario = $usuarioModelo->hasPermission($user['id'], 'Equipos', 'Leer');
+$puedeVerPrestamos = $usuarioModelo->hasPermission($user['id'], 'Prestamos', 'Leer');
+$puedeVerDevoluciones = $usuarioModelo->hasPermission($user['id'], 'Devoluciones', 'Leer');
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -11,6 +17,7 @@ $usuario = auth_require();
     <meta name="csrf-token" content="<?= htmlspecialchars(auth_token(), ENT_QUOTES, 'UTF-8') ?>">
     <link rel="stylesheet" href="Styles/index.css?v=<?= filemtime(__DIR__ . '/Styles/index.css') ?>">
     <link rel="stylesheet" href="Styles/prestamos.css">
+    <link rel="stylesheet" href="Styles/devoluciones.css">
     <title>Inicio | SistemasCrew Labs</title>
 </head>
 
@@ -22,63 +29,90 @@ $usuario = auth_require();
             <span class="texto-menu">SistemasCrew Labs</span>
         </a>
         <nav class="menu" id="menuPrincipal" aria-label="Navegaci&#243;n principal">
-            <a href="#inicio" data-vista="inicio" aria-label="Inicio" title="Inicio" aria-current="page">
+            <a id="InicioNav" href="#inicio" data-vista="inicio" aria-label="Inicio" title="Inicio" aria-current="page">
                 <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-7 9 7M5 9v12h5v-7h4v7h5V9"/></svg>
                 <span class="texto-menu">Inicio</span>
             </a>
-            <a href="#inventario" data-vista="inventario" aria-label="Inventario" title="Inventario">
+            <?php if ($puedeVerInventario): ?>
+            <a id="InventarioNav" href="#inventario" data-vista="inventario" aria-label="Inventario" title="Inventario">
                 <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4M3 7v10l9 4 9-4V7M12 11v10"/></svg>
                 <span class="texto-menu">Inventario</span>
             </a>
-            <a href="#prestamos" data-vista="prestamos" aria-label="Préstamos" title="Préstamos">
+            <?php endif; ?>
+            <?php if ($puedeVerPrestamos): ?>
+            <a id="PrestamosNav" href="#prestamos" data-vista="prestamos" aria-label="Préstamos" title="Préstamos">
                 <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h15M15 3l4 4-4 4M20 17H5M9 13l-4 4 4 4"/></svg>
                 <span class="texto-menu">Préstamos</span>
             </a>
-            <a href="#historial" data-vista="historial" aria-label="Historial" title="Historial">
+            <?php endif; ?>
+            <?php if ($puedeVerDevoluciones): ?>
+            <a id="DevolucionesNav" href="#devoluciones" data-vista="devoluciones" aria-label="Devoluciones" title="Devoluciones">
+                <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H4v5M4 4l7 7M20 13a7 7 0 0 1-12 5M20 4v5h-5"/></svg>
+                <span class="texto-menu">Devoluciones</span>
+            </a>
+            <?php endif; ?>
+            <a id="HistorialNav" href="#historial" data-vista="historial" aria-label="Historial" title="Historial">
                 <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11a9 9 0 1 1 2 7M3 4v7h7M12 7v5l3 2"/></svg>
                 <span class="texto-menu">Historial</span>
             </a>
         </nav>
         <div class="sesion">
-            <span class="nombre-usuario texto-menu"><?= htmlspecialchars($usuario['nombre'], ENT_QUOTES, 'UTF-8') ?></span>
-            <form action="api/auth/logout.php" method="post">
-                <input type="hidden" name="csrf" value="<?= htmlspecialchars(auth_token(), ENT_QUOTES, 'UTF-8') ?>">
-                <button type="submit" aria-label="Cerrar sesi&#243;n" title="Cerrar sesi&#243;n"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5H4v14h5M14 8l4 4-4 4M8 12h12"/></svg><span class="texto-menu">Cerrar sesi&#243;n</span></button>
-            </form>
+            <button id="PerfilImg" type="button" aria-label="Mostrar opciones de usuario" aria-controls="PerfilNav" aria-expanded="false">
+                <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 22v-3a8 8 0 0 1 16 0v3"/></svg>
+                <span class="nombre-usuario texto-menu"><?= htmlspecialchars($user['nombre'], ENT_QUOTES, 'UTF-8') ?></span>
+            </button>
+            <nav class="opciones-usuario" id="PerfilNav" aria-label="Opciones de usuario">
+                <form action="api/auth/logout.php" method="post">
+                    <input type="hidden" name="csrf" value="<?= htmlspecialchars(auth_token(), ENT_QUOTES, 'UTF-8') ?>">
+                    <button type="submit" aria-label="Cerrar sesi&#243;n" title="Cerrar sesi&#243;n"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5H4v14h5M14 8l4 4-4 4M8 12h12"/></svg><span class="texto-menu">Cerrar sesi&#243;n</span></button>
+                </form>
+            </nav>
         </div>
     </aside>
     <main>
-        <section class="inicio" id="inicio">
+        <section class="inicio Bienvenida" id="inicio">
             <div class="bienvenida">
                 <p class="etiqueta">SistemasCrew — Equipos de Laboratorio</p>
                 <h1>Tu próximo proyecto<br>empieza aquí.</h1>
                 <p>Consulta los equipos del laboratorio y solicita lo que necesitas para tus prácticas.</p>
+                <?php if ($puedeVerInventario): ?>
                 <a class="boton" href="#inventario" data-vista="inventario">Explorar inventario <span aria-hidden="true">→</span></a>
+                <?php endif; ?>
             </div>
+            <?php if ($puedeVerInventario || $puedeVerPrestamos): ?>
             <section class="opciones" aria-labelledby="tituloOpciones">
                 <p class="etiqueta">Accesos rápidos</p>
                 <h2 id="tituloOpciones">¿Qué necesitas hacer?</h2>
                 <div class="tarjetas">
+                    <?php if ($puedeVerInventario): ?>
                     <a class="tarjeta" href="#inventario" data-vista="inventario">
                         <span class="numero" aria-hidden="true">01</span>
                         <h3>Explorar equipos</h3>
                         <p>Busca equipos y consulta sus características y estado.</p>
                         <span class="enlace">Ver inventario →</span>
                     </a>
+                    <?php endif; ?>
+                    <?php if ($puedeVerPrestamos): ?>
                     <a class="tarjeta" href="#prestamos" data-vista="prestamos">
                         <span class="numero" aria-hidden="true">02</span>
                         <h3>Solicitar un préstamo</h3>
                         <p>Consulta los equipos disponibles y envía tu solicitud.</p>
                         <span class="enlace">Ver préstamos →</span>
                     </a>
+                    <?php endif; ?>
                 </div>
             </section>
+            <?php endif; ?>
         </section>
-        <div class="contenido" id="contenido" hidden></div>
+        <div class="contenido Contenido" id="contenido"></div>
     </main>
     <footer class="pie">SistemasCrew Labs — Gestión de equipos de laboratorio</footer>
+    <script src="Js/inventario.js?v=<?= filemtime(__DIR__ . '/Js/inventario.js') ?>"></script>
+    <script src="Js/prestamos.js?v=<?= filemtime(__DIR__ . '/Js/prestamos.js') ?>"></script>
+    <script src="Js/devoluciones.js?v=<?= filemtime(__DIR__ . '/Js/devoluciones.js') ?>"></script>
+    <script src="Js/historial.js?v=<?= filemtime(__DIR__ . '/Js/historial.js') ?>"></script>
     <script src="Js/index.js?v=<?= filemtime(__DIR__ . '/Js/index.js') ?>"></script>
-    <script src="Js/inventario.js"></script>
+    <script src="Js/menu.js?v=<?= filemtime(__DIR__ . '/Js/menu.js') ?>"></script>
 </body>
 
 </html>
