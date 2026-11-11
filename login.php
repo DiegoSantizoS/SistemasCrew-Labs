@@ -10,7 +10,8 @@ if (auth_user()) { header('Location: ' . auth_url('index.php')); exit; }
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Acceso | SistemasCrew Labs</title>
   
-  	<link rel="stylesheet" href="Styles/login.css">
+  	<link rel="stylesheet" href="Styles/login.css?v=<?= filemtime(__DIR__ . '/Styles/login.css') ?>">
+    <link rel="stylesheet" href="Styles/equipo.css?v=<?= filemtime(__DIR__ . '/Styles/equipo.css') ?>">
 </head>
 <body>
   <main class="cl-login10-demo">
@@ -51,6 +52,49 @@ if (auth_user()) { header('Location: ' . auth_url('index.php')); exit; }
       <div class="cl-login10__vh" role="status" aria-live="polite" data-live></div>
     </section>
   </main>
+    <section class="equipo" aria-labelledby="tituloEquipo">
+        <header class="equipo-cabecera">
+            <p class="equipo-etiqueta">SistemasCrew Labs</p>
+            <h2 id="tituloEquipo">Nuestro equipo</h2>
+        </header>
+        <div class="equipo-lista">
+            <article class="perfil">
+                <div class="perfil-foto">
+                    <img src="Images/Programadores/Carlos.jpeg" alt="Carlos Andres Arriaza Lara" width="130" height="130" loading="lazy">
+                </div>
+                <h3 class="perfil-nombre">Carlos Andres Arriaza Lara</h3>
+                <p class="perfil-cargo">0901-23-13862</p>
+                <p class="perfil-cargo">Desarrollo de software</p>
+                <div class="perfil-enlaces" aria-label="Enlaces de Carlos Andres Arriaza Lara">
+                    <a class="perfil-boton" href="https://github.com/RadeonHeartz" target="_blank" rel="noopener noreferrer">GitHub</a>
+                    <a class="perfil-boton" href="https://radeonheartz.github.io/CarlosAndres.github.io/" target="_blank" rel="noopener noreferrer">Portafolio</a>
+                </div>
+            </article>
+            <article class="perfil">
+                <div class="perfil-foto">
+                    <span class="perfil-iniciales" aria-hidden="true">02</span>
+                </div>
+                <h3 class="perfil-nombre">Integrante 2</h3>
+                <p class="perfil-cargo">Desarrollo de software</p>
+                <div class="perfil-enlaces" aria-label="Enlaces de Integrante 2">
+                    <button class="perfil-boton" type="button" disabled>GitHub</button>
+                    <button class="perfil-boton" type="button" disabled>Portafolio</button>
+                </div>
+            </article>
+            <article class="perfil">
+                <div class="perfil-foto">
+                    <span class="perfil-iniciales" aria-hidden="true">03</span>
+                </div>
+                <h3 class="perfil-nombre">Integrante 3</h3>
+                <p class="perfil-cargo">Desarrollo de software</p>
+                <div class="perfil-enlaces" aria-label="Enlaces de Integrante 3">
+                    <button class="perfil-boton" type="button" disabled>GitHub</button>
+                    <button class="perfil-boton" type="button" disabled>Portafolio</button>
+                </div>
+            </article>
+        </div>
+    </section>
 	<script src="Js/login.js"></script>
+    <script src="Js/equipo.js?v=<?= filemtime(__DIR__ . '/Js/equipo.js') ?>"></script>
 </body>
 </html>

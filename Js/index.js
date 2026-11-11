@@ -1,97 +1,76 @@
-const PerfilImg = document.getElementById("PerfilImg");
-const PerfilNav = document.getElementById("PerfilNav");
+const inicio = document.getElementById("inicio");
+const contenido = document.getElementById("contenido");
+const menu = document.getElementById("menuPrincipal");
+const botonMenu = document.getElementById("botonMenu");
+let cargaActual = 0;
 
-PerfilImg.addEventListener("click", function () {
-  PerfilNav.classList.toggle("mostrar");
+function cambiarMenu(expandido) {
+  document.body.classList.toggle("menu-expandido", expandido);
+  botonMenu.setAttribute("aria-expanded", String(expandido));
+  botonMenu.setAttribute("aria-label", expandido ? "Contraer men\u00fa" : "Expandir men\u00fa");
+}
+
+botonMenu.addEventListener("click", () => {
+  cambiarMenu(!document.body.classList.contains("menu-expandido"));
 });
-let $ = (doc) => document.querySelector(doc);
-let $$ = (doc) => document.querySelectorAll(doc);
-const historialNav = $("#HistorialNav");
 
-function cargarInventario() {
-  let InventarioNav = $("#InventarioNav");
+document.addEventListener("keydown", (evento) => {
+  if (evento.key === "Escape" && document.body.classList.contains("menu-expandido")) {
+    cambiarMenu(false);
+    botonMenu.focus();
+  }
+});
 
-  InventarioNav.addEventListener("click", function () {
-    $(".Bienvenida").style.display = "none";
-
-    fetch("Sites/inventario.html")
-      .then((response) => response.text())
-      .then((html) => {
-        $(".Contenido").innerHTML = html;
-
-        // Conecta el buscador una vez que su campo existe en el documento.
-        inicializarBuscadorInventario();
-        TablaPaginada();
-        ObtenerCategorias();
-        ObtenerUbicaciones();
-        ObtenerEstadosEquipo();
-        cargarModal();
-
-        // Evento para cerrar el modal de preview
-        const cerrarPreview = $("#cerrarPreview");
-
-        if (cerrarPreview) {
-          cerrarPreview.addEventListener("click", CerrarPreview);
-        }
-
-        document.title = "Inventario";
-      })
-      .catch((error) => {
-        alert("Error al cargar el contenido: " + error);
-      });
+async function mostrarVista(vista) {
+  const carga = ++cargaActual;
+  if (window.matchMedia("(max-width: 700px)").matches) cambiarMenu(false);
+  menu.querySelectorAll("[data-vista]").forEach((enlace) => {
+    if (enlace.dataset.vista === vista) enlace.setAttribute("aria-current", "page");
+    else enlace.removeAttribute("aria-current");
   });
-}
-
-function cargarHistorial() {
-  historialNav.addEventListener("click", function () {
-    $(".Bienvenida").style.display = "none";
-    fetch("Sites/historial.html")
-      .then((response) => response.text())
-      .then((html) => {
-        $(".Contenido").innerHTML = html;
-        document.title = "Historial";
-      })
-      .catch((error) => {
-        alert("Error al cargar el contenido: " + error);
-      });
-  });
-}
-
-function CargarInicio() {
-  let InicioNav = $("#InicioNav");
-  InicioNav.addEventListener("click", function () {
-    $(".Contenido").innerHTML = "";
-    $(".Bienvenida").style.display = "block";
-    document.title = "Inicio";
-  });
-}
-
-function cargarPrestamos() {
-  const prestamosNav = $("#PrestamosNav");
-  prestamosNav.addEventListener("click", async function (event) {
-    event.preventDefault();
-    $(".Bienvenida").style.display = "none";
-    const contenido = $(".Contenido");
-    contenido.textContent = "Cargando préstamos…";
-    try {
-      const response = await fetch("Sites/prestamos.html");
-      if (!response.ok) throw new Error("No se pudo cargar la página de préstamos.");
-      contenido.innerHTML = await response.text();
-      document.title = "Préstamos";
-      if (!document.querySelector('script[data-prestamos]')) {
-        const script = document.createElement("script");
-        script.src = "Js/prestamos.js";
-        script.dataset.prestamos = "true";
-        document.body.appendChild(script);
+  inicio.hidden = vista !== "inicio";
+  contenido.hidden = vista === "inicio";
+  if (vista === "inicio") {
+    contenido.replaceChildren();
+    document.title = "Inicio | SistemasCrew Labs";
+    return;
+  }
+  contenido.textContent = "Cargando...";
+  try {
+    const respuesta = await fetch(`Sites/${vista}.html`);
+    if (!respuesta.ok) throw new Error("No se pudo cargar la vista.");
+    const html = await respuesta.text();
+    if (carga !== cargaActual) return;
+    contenido.innerHTML = html;
+    document.title = `${vista.charAt(0).toUpperCase() + vista.slice(1)} | SistemasCrew Labs`;
+    if (vista === "inventario") {
+      inicializarBuscadorInventario();
+      TablaPaginada();
+      ObtenerCategorias();
+      ObtenerUbicaciones();
+      ObtenerEstadosEquipo();
+      cargarModal();
+      const cerrarDetalle = document.getElementById("cerrarPreview");
+      if (cerrarDetalle) cerrarDetalle.addEventListener("click", CerrarPreview);
+    }
+    if (vista === "prestamos") {
+      if (!document.querySelector("script[data-prestamos]")) {
+        const archivo = document.createElement("script");
+        archivo.src = "Js/prestamos.js";
+        archivo.dataset.prestamos = "true";
+        document.body.appendChild(archivo);
       } else if (typeof initPrestamos === "function") {
         initPrestamos();
       }
-    } catch (error) {
-      contenido.textContent = error.message;
     }
-  });
+  } catch (error) {
+    if (carga === cargaActual) contenido.textContent = error.message;
+  }
 }
-cargarInventario();
-CargarInicio();
-cargarPrestamos();
-cargarHistorial();
+
+document.querySelectorAll("[data-vista]").forEach((enlace) => {
+  enlace.addEventListener("click", (evento) => {
+    evento.preventDefault();
+    mostrarVista(enlace.dataset.vista);
+  });
+});
