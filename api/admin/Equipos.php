@@ -54,19 +54,13 @@ switch ($method) {
         }
         break;
     case 'POST':
-        $codigo = $_POST['codigo'] ?? null;
-        $categoria = $_POST['categoria'] ?? null;
-        $ubicacion = $_POST['ubicacion'] ?? null;
-        $estado = $_POST['estado'] ?? null;
-        $marca = $_POST['marca'] ?? null;
-        $modelo = $_POST['modelo'] ?? null;
-        $serie = $_POST['serie'] ?? null;
-        $descripcion = $_POST['descripcion'] ?? null;
-        $imagen = $_POST['imagen'] ?? null;
-
-        if (empty(trim($codigo)) || empty(trim($categoria)) || empty(trim($ubicacion)) || empty(trim($estado)) || empty(trim($descripcion))) {
-            $response->error("Faltan datos obligatorios", 2002, 400);
-            die();
+        foreach (['sufijo', 'categoria', 'ubicacion', 'estado', 'descripcion'] as $campo) {
+            if (!isset($_POST[$campo]) || !is_string($_POST[$campo]) || trim($_POST[$campo]) === '') {
+                $response->error("Faltan datos obligatorios", 2002, 400);
+            }
+        }
+        if (filter_var($_POST['categoria'], FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) === false) {
+            $response->error("Selecciona una categoría válida.", 2002, 422);
         }
         try {
             $equipo = new Equipo($conection, $response);
