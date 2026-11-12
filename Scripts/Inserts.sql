@@ -82,13 +82,6 @@ WHERE NOT EXISTS (
 ORDER BY m.Id_Modulo, a.Id_Accion;
 
 -- Administrador: todos los permisos, incluyendo Devoluciones.
--- Retira cualquier permiso previo de inventario del rol Usuario.
-DELETE rp
-FROM Rol_Permiso rp
-JOIN Rol r ON r.Id_Rol = rp.Id_Rol
-JOIN Permiso p ON p.Id_Permiso = rp.Id_Permiso
-JOIN Modulo m ON m.Id_Modulo = p.Id_Modulo
-WHERE r.Nombre_Rol = 'Usuario' AND m.Nombre_Modulo = 'Equipos';
 
 INSERT INTO Rol_Permiso (Id_Rol, Id_Permiso)
 SELECT r.Id_Rol, p.Id_Permiso
