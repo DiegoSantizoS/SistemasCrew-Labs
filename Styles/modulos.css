@@ -1,0 +1,316 @@
+:root {
+    --fondo-campo: var(--fondo-cabecera);
+    --radio-modulo: 16px;
+    --radio-control: 8px;
+    --color-exito: #96e4bb;
+    --fondo-exito: #223e35;
+    --color-alerta: #f5d28b;
+    --fondo-alerta: #443b29;
+    --color-error: #ffb4c1;
+    --fondo-error: #492d3b;
+    --fondo-informacion: #293b56;
+    --fondo-capa: rgba(12, 16, 28, 0.75);
+    --sombra-dialogo: rgba(0, 0, 0, 0.35);
+    --tiempo-control: 0.15s;
+}
+
+.encabezado-modulo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.contenido .encabezado-modulo h1 {
+    margin: 0;
+}
+
+.contenido :is(.equipo-card, .devolucion-card) h2 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.contenido h1 {
+    margin: 0 0 1.25rem;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+}
+
+.contenido h2 {
+    margin: 1.25rem 0 0.85rem;
+    font-size: 1.2rem;
+    line-height: 1.4;
+}
+
+.contenido label {
+    color: var(--texto-suave);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.contenido button {
+    min-height: 42px;
+    width: fit-content;
+    padding: 0.65rem 1rem;
+    border: 1px solid var(--borde-acento);
+    border-radius: var(--radio-control);
+    background: var(--fondo-boton);
+    color: var(--texto-principal);
+    font: inherit;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background-color var(--tiempo-control) ease,
+        border-color var(--tiempo-control) ease;
+}
+
+.contenido button:not(:disabled):hover {
+    background: var(--fondo-boton-activo);
+    border-color: var(--color-foco);
+}
+
+.contenido button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.contenido button.btn-delete {
+    background: var(--fondo-error);
+    border-color: var(--color-error);
+    color: var(--color-error);
+}
+
+.contenido button.btn-delete:not(:disabled):hover {
+    background: var(--color-error);
+    color: var(--fondo-cabecera);
+}
+
+.contenido .btn-preview,
+.contenido #cerrarPrestamo,
+.contenido #cancelarDevolucion {
+    background: var(--fondo-campo);
+    color: var(--texto-suave);
+    border-color: var(--borde-boton);
+}
+
+.contenido :is(input:not([type="hidden"]), select, textarea) {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 44px;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--borde-boton);
+    border-radius: var(--radio-control);
+    background: var(--fondo-campo);
+    color: var(--texto-principal);
+    font: inherit;
+    line-height: 1.4;
+}
+
+.contenido input[type="search"] {
+    max-width: 38rem;
+}
+
+.contenido :is(input, textarea)::placeholder {
+    color: var(--texto-suave);
+    opacity: 0.7;
+}
+
+.contenido :is(input, select, textarea):focus {
+    outline: 2px solid var(--color-foco);
+    outline-offset: 2px;
+    border-color: var(--borde-acento);
+}
+
+.contenido :is(input, select, textarea):disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.contenido textarea {
+    min-height: 7rem;
+    resize: vertical;
+}
+
+.contenido :is([role="status"], #ayudaContrasenaUsuario) {
+    margin: 0.6rem 0 1rem;
+    color: var(--texto-suave);
+    font-size: 0.9rem;
+    overflow-wrap: anywhere;
+}
+
+.contenido [role="status"]:empty {
+    display: none;
+}
+
+.contenido :is(.error, #mensajeFormularioUsuario) {
+    color: var(--color-error);
+}
+
+.tabla-desplazable {
+    max-width: 100%;
+    margin: 1rem 0;
+    overflow-x: auto;
+    border: 1px solid var(--borde-suave);
+    border-radius: var(--radio-menu);
+    scrollbar-color: var(--borde-boton) var(--fondo-campo);
+}
+
+.tabla-desplazable:focus-visible {
+    outline: 2px solid var(--color-foco);
+    outline-offset: 3px;
+}
+
+.contenido table {
+    width: 100%;
+    min-width: 42rem;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    text-align: left;
+}
+
+.contenido th {
+    padding: 0.9rem 1rem;
+    background: var(--fondo-campo);
+    color: var(--color-acento);
+    white-space: nowrap;
+    font-size: 0.8rem;
+    letter-spacing: 0.03em;
+}
+
+.contenido td {
+    max-width: 24rem;
+    padding: 0.85rem 1rem;
+    border-top: 1px solid var(--borde-suave);
+    vertical-align: top;
+    overflow-wrap: anywhere;
+}
+
+.contenido tbody tr {
+    background: var(--fondo-fila, transparent);
+}
+
+.contenido tbody tr:hover {
+    background: var(--fondo-tarjeta-activa);
+}
+
+#usuariosTable {
+    min-width: 68rem;
+}
+
+.contenido :is(#inventarioTable, #usuariosTable) td:last-child {
+    min-width: 17rem;
+}
+
+.contenido td button {
+    min-height: 36px;
+    margin: 0 0.35rem 0.35rem 0;
+    padding: 0.45rem 0.7rem;
+    font-size: 0.8rem;
+}
+
+.contenido :is(#Paginacion, #PaginacionBusqueda, #paginasUsuarios, #paginasBusquedaUsuarios, nav[aria-label]) {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+}
+
+.contenido button[aria-current="page"] {
+    border-color: var(--color-foco);
+    background: var(--fondo-boton-activo);
+    box-shadow: inset 0 0 0 1px var(--color-foco);
+}
+
+.contenido dialog {
+    box-sizing: border-box;
+    width: min(92vw, 48rem);
+    max-height: 88dvh;
+    margin: auto;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    overflow-y: auto;
+    border: 1px solid var(--borde-acento);
+    border-radius: var(--radio-modulo);
+    background: var(--fondo-tarjeta);
+    color: var(--texto-principal);
+    box-shadow: 0 24px 80px var(--sombra-dialogo);
+    color-scheme: dark;
+}
+
+.contenido dialog::backdrop {
+    background: var(--fondo-capa);
+    backdrop-filter: blur(3px);
+}
+
+.contenido dialog > button:first-child {
+    float: right;
+    margin: 0 0 1rem 1rem;
+    background: var(--fondo-campo);
+    border-color: var(--borde-boton);
+}
+
+.contenido dialog h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    padding-right: 5rem;
+}
+
+.contenido dialog form {
+    display: grid;
+    gap: 0.85rem;
+    clear: both;
+}
+
+.contenido dialog form p {
+    margin: 0;
+}
+
+.contenido dialog form label {
+    display: block;
+    margin-bottom: 0.4rem;
+}
+
+#formularioUsuario {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+#formularioUsuario > :is(#ayudaContrasenaUsuario, #mensajeFormularioUsuario, button) {
+    grid-column: 1 / -1;
+}
+
+.contenido :is(.acciones, .acciones-devolucion) {
+    margin-top: 0.75rem;
+}
+
+@media (max-width: 600px) {
+    #formularioUsuario {
+        grid-template-columns: 1fr;
+    }
+
+    .contenido dialog {
+        width: 94vw;
+        max-height: 92dvh;
+    }
+
+    .contenido td,
+    .contenido th {
+        padding: 0.7rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .contenido button {
+        transition: none;
+    }
+}
+
+.contenido :is(#cerrarPrestamo, #cancelarDevolucion):not(:disabled):hover {
+    background: var(--fondo-tarjeta-activa);
+    color: var(--texto-principal);
+}

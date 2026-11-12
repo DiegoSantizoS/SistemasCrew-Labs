@@ -1,4 +1,7 @@
-<button id="IngresarEquipo">Ingresar Equipo</button>
+<header class="encabezado-modulo">
+    <h1>Inventario</h1>
+    <button id="IngresarEquipo" type="button">Ingresar equipo</button>
+</header>
 
 <dialog class="Formulario" id="ModalEquipos">
   <button id="cerrarModal">Cerrar</button>
@@ -60,18 +63,20 @@
     <input type="search" id="buscarEquipo" maxlength="100" placeholder="Escribe un código o descripción" aria-controls="inventarioTable" />
     <p id="resultadoBusqueda" role="status" aria-live="polite"></p>
   </div>
-  <table id="inventarioTable">
-    <thead>
-      <tr>
-        <th>Codigo Equipo</th>
-        <th>Descripción</th>
-        <th>Categorias</th>
-        <th>Estado</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div class="tabla-desplazable" role="region" aria-label="Inventario de equipos" tabindex="0">
+      <table id="inventarioTable">
+        <thead>
+          <tr>
+            <th>Codigo Equipo</th>
+            <th>Descripción</th>
+            <th>Categorias</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+  </div>
   <div id="Paginacion"></div>
   <div id="PaginacionBusqueda" hidden aria-label="Páginas de resultados de búsqueda"></div>
 </div>

@@ -1,4 +1,3 @@
-@import url("inventario.css");
 :root {
   --fondo-pagina: #2e3141;
   --fondo-cabecera: #272a38;
@@ -125,6 +124,7 @@ body.menu-expandido {
 
 .marca,
 .menu a,
+.sesion .datos-usuario,
 .sesion button {
   display: flex;
   align-items: center;
@@ -212,9 +212,18 @@ main {
   background: var(--fondo-tarjeta-activa);
 }
 
+.inicio {
+}
+
 .bienvenida {
-  padding: 4rem 0 5rem;
-  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100dvh;
+  max-width: 100dvw;
+  padding: 2rem 0;
+  box-sizing: border-box;
 }
 
 .etiqueta {
@@ -357,11 +366,14 @@ main {
 }
 
 .contenido {
-  background: var(--texto-principal);
-  color: var(--texto-contenido);
-  padding: 1.5rem;
-  border-radius: var(--radio-panel);
-  overflow-x: auto;
+    margin-top: 2rem;
+    padding: clamp(1rem, 2.5vw, 2rem);
+    border: 1px solid var(--borde-suave);
+    border-radius: var(--radio-modulo);
+    background: var(--fondo-tarjeta);
+    color: var(--texto-principal);
+    min-width: 0;
+    color-scheme: dark;
 }
 
 .pie {
@@ -417,20 +429,38 @@ main {
 }
 
 .Contenido:empty {
-    display: none;
+  display: none;
 }
 
 .opciones-usuario {
-    display: none;
-    margin-top: 0.75rem;
+  display: block;
+  margin-top: 0.75rem;
 }
 
-.opciones-usuario.mostrar {
-    display: block;
+
+.sesion .datos-usuario {
+    padding: 12px;
+    border: 1px solid transparent;
 }
 
 .sesion .nombre-usuario {
-    margin-bottom: 0;
-    min-width: 0;
-    text-align: left;
+  margin-bottom: 0;
+  min-width: 0;
+  text-align: left;
+}
+
+.menu .opcion-pendiente {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 50px;
+  padding: 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radio-menu);
+  background: transparent;
+  color: var(--texto-suave);
+  font: inherit;
+  text-align: left;
+  opacity: 0.6;
+  cursor: not-allowed;
 }

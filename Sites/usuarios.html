@@ -1,0 +1,89 @@
+<header class="encabezado-modulo">
+    <h1>Usuarios</h1>
+    <button id="IngresarUsuario" type="button" hidden>Ingresar usuario</button>
+</header>
+
+<dialog class="Formulario" id="modalUsuario" aria-labelledby="tituloFormularioUsuario">
+    <button type="button" id="cerrarFormularioUsuario">Cerrar</button>
+    <h2 id="tituloFormularioUsuario">Agregar usuario</h2>
+    <form id="formularioUsuario" action="api/admin/Usuarios.php" method="post">
+        <input type="hidden" id="idUsuario" name="id">
+        <p>
+            <label for="usuario-nombres">Nombres</label>
+            <input id="usuario-nombres" name="nombres" type="text" maxlength="100" autocomplete="given-name" required>
+        </p>
+        <p>
+            <label for="usuario-apellidos">Apellidos</label>
+            <input id="usuario-apellidos" name="apellidos" type="text" maxlength="100" autocomplete="family-name" required>
+        </p>
+        <p>
+            <label for="usuario-carnet">Carnet</label>
+            <input id="usuario-carnet" name="carnet" type="text" maxlength="50" autocomplete="off" required>
+        </p>
+        <p>
+            <label for="usuario-correo">Correo</label>
+            <input id="usuario-correo" name="correo" type="email" maxlength="150" autocomplete="email" required>
+        </p>
+        <p>
+            <label for="usuario-usuario">Usuario</label>
+            <input id="usuario-usuario" name="usuario" type="text" maxlength="50" autocomplete="off" required>
+        </p>
+        <p>
+            <label for="usuario-telefono">Teléfono</label>
+            <input id="usuario-telefono" name="telefono" type="tel" maxlength="20" autocomplete="tel">
+        </p>
+        <p>
+            <label for="usuario-rol">Rol</label>
+            <select id="usuario-rol" name="id_rol" required></select>
+        </p>
+        <p>
+            <label for="usuario-estado">Estado</label>
+            <select id="usuario-estado" name="id_estado" required></select>
+        </p>
+        <p>
+            <label for="usuario-contrasena">Contraseña</label>
+            <input id="usuario-contrasena" name="contrasena" type="password" minlength="8" maxlength="72" autocomplete="new-password" aria-describedby="ayudaContrasenaUsuario">
+        </p>
+        <p>
+            <label for="usuario-confirmacion">Confirmar contraseña</label>
+            <input id="usuario-confirmacion" name="confirmacion" type="password" maxlength="72" autocomplete="new-password" aria-describedby="ayudaContrasenaUsuario">
+        </p>
+        <p id="ayudaContrasenaUsuario">Al menos 8 caracteres y como máximo 72 bytes. Al editar, deja ambos campos vacíos para conservar la contraseña.</p>
+        <p id="mensajeFormularioUsuario" role="status" aria-live="polite"></p>
+        <button type="submit" id="guardarUsuario">Agregar usuario</button>
+    </form>
+</dialog>
+
+<dialog id="detalleUsuario" aria-labelledby="tituloDetalleUsuario">
+    <button type="button" id="cerrarDetalleUsuario">Cerrar</button>
+    <h2 id="tituloDetalleUsuario">Detalles del usuario</h2>
+    <div id="datosDetalleUsuario"></div>
+</dialog>
+
+<div id="usuariosContainer">
+    <div class="buscador-inventario">
+        <label for="buscarUsuario">Buscar usuarios</label>
+        <input type="search" id="buscarUsuario" maxlength="100" placeholder="Escribe un nombre, carnet, correo, usuario, rol o estado" aria-controls="usuariosTable" />
+        <p id="mensajeUsuarios" role="status" aria-live="polite"></p>
+    </div>
+    <div class="tabla-desplazable" role="region" aria-label="Usuarios registrados" tabindex="0">
+        <table id="usuariosTable">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Nombres</th>
+                    <th scope="col">Apellidos</th>
+                    <th scope="col">Carnet</th>
+                    <th scope="col">Correo</th>
+                    <th scope="col">Usuario</th>
+                    <th scope="col">Rol</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="filasUsuarios"></tbody>
+        </table>
+    </div>
+    <div id="paginasUsuarios" aria-label="Páginas de usuarios"></div>
+    <div id="paginasBusquedaUsuarios" hidden aria-label="Páginas de resultados de búsqueda"></div>
+</div>
