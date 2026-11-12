@@ -464,3 +464,59 @@ main {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+main,
+.contenido,
+.encabezado-modulo > * {
+    min-width: 0;
+}
+
+.bienvenida :is(h1, p),
+.tarjeta :is(h3, p) {
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+    :root {
+        --ancho-barra-cerrada: 64px;
+    }
+
+    .barra-lateral {
+        padding: 0.75rem 9px;
+    }
+
+    .boton-menu {
+        width: 44px;
+        min-height: 44px;
+    }
+
+    .menu a,
+    .sesion button,
+    .sesion .datos-usuario {
+        min-height: 44px;
+        padding: 9px;
+    }
+
+    .marca img {
+        width: 32px;
+        height: 32px;
+        margin: 6px;
+    }
+
+    main {
+        padding: 0 0.65rem 1.5rem;
+    }
+
+    .contenido {
+        margin-top: 1rem;
+        padding: 0.85rem;
+    }
+
+    .bienvenida h1 {
+        font-size: clamp(1.8rem, 7vw, 2.5rem);
+    }
+
+    .tarjeta {
+        padding: 1.25rem;
+    }
+}
