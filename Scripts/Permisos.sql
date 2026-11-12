@@ -1,6 +1,10 @@
 USE dbSistemasCrew;
 START TRANSACTION;
 
+INSERT INTO Modulo (Nombre_Modulo)
+SELECT 'Devoluciones'
+WHERE NOT EXISTS (SELECT 1 FROM Modulo WHERE Nombre_Modulo='Devoluciones');
+
 INSERT INTO Permiso (Id_Accion, Id_Modulo)
 SELECT a.Id_Accion, m.Id_Modulo
 FROM Accion a CROSS JOIN Modulo m
@@ -18,11 +22,13 @@ WHERE (
     OR (r.Nombre_Rol = 'Encargado' AND (
         (m.Nombre_Modulo = 'Equipos' AND a.Nombre_Accion IN ('Crear', 'Leer', 'Actualizar'))
         OR (m.Nombre_Modulo = 'Prestamos' AND a.Nombre_Accion IN ('Crear', 'Leer', 'Actualizar', 'Autorizar'))
+        OR (m.Nombre_Modulo = 'Devoluciones' AND a.Nombre_Accion = 'Leer')
         OR (m.Nombre_Modulo IN ('Usuarios', 'Reportes') AND a.Nombre_Accion = 'Leer')
     ))
     OR (r.Nombre_Rol = 'Usuario' AND (
         (m.Nombre_Modulo = 'Equipos' AND a.Nombre_Accion = 'Leer')
         OR (m.Nombre_Modulo = 'Prestamos' AND a.Nombre_Accion IN ('Crear', 'Leer'))
+        OR (m.Nombre_Modulo = 'Devoluciones' AND a.Nombre_Accion = 'Leer')
     ))
 )
 AND NOT EXISTS (

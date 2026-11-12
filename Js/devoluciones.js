@@ -3,14 +3,42 @@ function initDevoluciones() {
   const aviso = document.querySelector("#avisoDevoluciones");
   const modal = document.querySelector("#modalDevolucion");
   const form = document.querySelector("#formDevolucion");
-  const seccionVencidos = document.querySelector("#seccionVencidos");
+  const panelDevoluciones = document.querySelector("#panelDevoluciones");
+  const panelMultas = document.querySelector("#panelMultas");
+  const tabDevoluciones = document.querySelector("#tabDevoluciones");
+  const tabMultas = document.querySelector("#tabMultas");
   const listaVencidos = document.querySelector("#listaVencidos");
-  if (!lista || !aviso || !modal || !form || !seccionVencidos || !listaVencidos || form.dataset.inicializado) return;
+  if (!lista || !aviso || !modal || !form || !panelDevoluciones || !panelMultas || !tabDevoluciones || !tabMultas || !listaVencidos || form.dataset.inicializado) return;
   form.dataset.inicializado = "true";
   const api = "api/admin/Devoluciones.php";
   let csrf = "";
   let prestamos = [];
   let esAdmin = false;
+
+  function activarTab(tabActiva) {
+    const multasActivas = esAdmin && tabActiva === tabMultas;
+    tabDevoluciones.setAttribute("aria-selected", String(!multasActivas));
+    tabMultas.setAttribute("aria-selected", String(multasActivas));
+    tabDevoluciones.classList.toggle("activa", !multasActivas);
+    tabMultas.classList.toggle("activa", multasActivas);
+    tabDevoluciones.tabIndex = multasActivas ? -1 : 0;
+    tabMultas.tabIndex = multasActivas ? 0 : -1;
+    panelDevoluciones.hidden = multasActivas;
+    panelMultas.hidden = !multasActivas;
+  }
+
+  tabDevoluciones.addEventListener("click", () => activarTab(tabDevoluciones));
+  tabMultas.addEventListener("click", () => activarTab(tabMultas));
+  for (const tab of [tabDevoluciones, tabMultas]) {
+    tab.addEventListener("keydown", event => {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+      event.preventDefault();
+      const destino = tab === tabDevoluciones ? tabMultas : tabDevoluciones;
+      if (destino.hidden) return;
+      activarTab(destino);
+      destino.focus();
+    });
+  }
 
   async function pedir(options = {}) {
     const headers = new Headers(options.headers || {});
@@ -43,7 +71,7 @@ function initDevoluciones() {
       ["Ubicación", prestamo.ubicacion],
       ["Fecha del préstamo", fecha(prestamo.fecha_prestamo)],
       ["Fecha prevista de devolución", fecha(prestamo.fecha_vencimiento)],
-      ["Estado del préstamo", prestamo.estado_prestamo],
+      ["Estado del préstamo", prestamo.estado_calculado || prestamo.estado_prestamo],
     ]) {
       const dt = document.createElement("dt");
       dt.textContent = label;
@@ -72,7 +100,7 @@ function initDevoluciones() {
       estado.className = "devolucion-completada";
       estado.textContent = `Devuelto el ${fecha(prestamo.fecha_devolucion)} · Estado: ${prestamo.estado_retorno || "registrado"}`;
       tarjeta.appendChild(estado);
-    } else if (esAdmin && ["Activo", "Vencido"].includes(prestamo.estado_prestamo)) {
+    } else if (esAdmin && ["Pendiente de devolución", "Vencido"].includes(prestamo.estado_calculado || prestamo.estado_prestamo)) {
       const boton = document.createElement("button");
       boton.type = "button";
       boton.textContent = "Registrar devolución";
@@ -88,7 +116,7 @@ function initDevoluciones() {
         modal.showModal();
       });
       tarjeta.appendChild(boton);
-    } else if (["Activo", "Vencido"].includes(prestamo.estado_prestamo)) {
+    } else if (["Pendiente de devolución", "Vencido"].includes(prestamo.estado_calculado || prestamo.estado_prestamo)) {
       const nota = document.createElement("p");
       nota.className = "devolucion-pendiente-admin";
       nota.textContent = "La devolución debe registrarla un administrador.";
@@ -101,9 +129,10 @@ function initDevoluciones() {
     lista.replaceChildren();
     listaVencidos.replaceChildren();
     const vencidos = esAdmin
-      ? prestamos.filter(p => !p.fecha_devolucion && Number(p.dias_retraso) > 0 && ["Activo", "Vencido"].includes(p.estado_prestamo))
+      ? prestamos.filter(p => !p.fecha_devolucion && Number(p.dias_retraso) > 0 && p.estado_calculado === "Vencido")
       : [];
-    seccionVencidos.hidden = !esAdmin;
+    tabMultas.hidden = !esAdmin;
+    if (!esAdmin) activarTab(tabDevoluciones);
     if (esAdmin && vencidos.length === 0) {
       const vacio = document.createElement("p");
       vacio.className = "sin-vencidos";
@@ -115,6 +144,13 @@ function initDevoluciones() {
     const prestamosVisibles = esAdmin ? prestamos.filter(p => !vencidos.includes(p)) : prestamos;
     if (!prestamos.length) {
       aviso.textContent = esAdmin ? "No hay préstamos registrados." : "Todavía no tienes préstamos registrados.";
+      listaVencidos.replaceChildren();
+      if (esAdmin) {
+        const vacio = document.createElement("p");
+        vacio.className = "sin-vencidos";
+        vacio.textContent = "No hay préstamos vencidos pendientes de devolución.";
+        listaVencidos.appendChild(vacio);
+      }
       return;
     }
     aviso.textContent = esAdmin
@@ -140,6 +176,7 @@ function initDevoluciones() {
       prestamos = result.data;
       document.querySelector(".devoluciones-page h1").textContent = esAdmin ? "Préstamos por devolver" : "Mis préstamos";
       mostrarPrestamos();
+      activarTab(tabDevoluciones);
     } catch (error) {
       aviso.textContent = error.message;
     }

@@ -17,6 +17,16 @@ if ($method === 'GET') {
                                   p.emision_fecha_prestamo AS fecha_prestamo,
                                   p.vencimiento_fecha_prestamo AS fecha_vencimiento,
                                   ep.nombre_estado AS estado_prestamo,
+                                  CASE
+                                    WHEN d.Fecha_Devolucion IS NULL
+                                      AND ep.nombre_estado IN ('Activo','Vencido')
+                                      AND DATE(p.vencimiento_fecha_prestamo) < CURDATE()
+                                      THEN 'Vencido'
+                                    WHEN d.Fecha_Devolucion IS NULL
+                                      AND ep.nombre_estado IN ('Activo','Vencido')
+                                      THEN 'Pendiente de devolución'
+                                    ELSE ep.nombre_estado
+                                  END AS estado_calculado,
                                   CONCAT(per.Nombres_Persona, ' ', per.Apellidos_Persona) AS usuario,
                                   d.Fecha_Devolucion AS fecha_devolucion,
                                   er.Nombre_Estado_Equipo AS estado_retorno,
@@ -81,7 +91,7 @@ try {
     $detalle = $q->fetch(PDO::FETCH_ASSOC);
     if (!$detalle) {
         $db->rollBack();
-        Response::error('No se encontró un equipo pendiente de devolución asociado a tu cuenta.', -404, 404);
+        Response::error('No se encontró un equipo pendiente de devolución.', -404, 404);
     }
 
     $nombreEstado = $estadoRetorno === 'disponible' ? 'Disponible' : 'En reparación';

@@ -41,7 +41,7 @@ function initPrestamos() {
     estado.textContent = equipo.Estado;
     const boton = document.createElement("button");
     boton.type = "button";
-    boton.textContent = esAdmin ? "Asignar préstamo" : "Solicitar préstamo";
+    boton.textContent = esAdmin ? "Asignar préstamo" : "Registrar préstamo";
     boton.addEventListener("click", () => {
       form.reset();
       form.elements.equipo_id.value = equipo.Id_Equipo;
@@ -65,8 +65,8 @@ function initPrestamos() {
       selectorUsuario.disabled = !esAdmin;
       selectorUsuario.required = esAdmin;
       selectorUsuario.replaceChildren(new Option("Selecciona un usuario activo", ""));
-      document.querySelector("#tituloFormulario").textContent = esAdmin ? "Asignar préstamo" : "Solicitar préstamo";
-      form.querySelector('button[type="submit"]').textContent = esAdmin ? "Asignar préstamo" : "Enviar solicitud";
+      document.querySelector("#tituloFormulario").textContent = esAdmin ? "Asignar préstamo" : "Registrar préstamo";
+      form.querySelector('button[type="submit"]').textContent = esAdmin ? "Asignar préstamo" : "Registrar préstamo";
       if (esAdmin) {
         result.usuarios.forEach(usuario => {
           const option = document.createElement("option");
