@@ -12,6 +12,7 @@ WHERE NOT EXISTS (
     SELECT 1 FROM Permiso p WHERE p.Id_Accion = a.Id_Accion AND p.Id_Modulo = m.Id_Modulo
 );
 
+
 INSERT INTO Rol_Permiso (Id_Rol, Id_Permiso)
 SELECT r.Id_Rol, p.Id_Permiso
 FROM Rol r CROSS JOIN Permiso p
@@ -26,9 +27,7 @@ WHERE (
         OR (m.Nombre_Modulo IN ('Usuarios', 'Reportes') AND a.Nombre_Accion = 'Leer')
     ))
     OR (r.Nombre_Rol = 'Usuario' AND (
-        (m.Nombre_Modulo = 'Equipos' AND a.Nombre_Accion = 'Leer')
-        OR (m.Nombre_Modulo = 'Prestamos' AND a.Nombre_Accion IN ('Crear', 'Leer'))
-        OR (m.Nombre_Modulo = 'Devoluciones' AND a.Nombre_Accion = 'Leer')
+        (m.Nombre_Modulo = 'Prestamos' AND a.Nombre_Accion IN ('Crear', 'Leer'))
     ))
 )
 AND NOT EXISTS (

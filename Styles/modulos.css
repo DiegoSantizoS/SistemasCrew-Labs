@@ -314,3 +314,210 @@
     background: var(--fondo-tarjeta-activa);
     color: var(--texto-principal);
 }
+
+.contenido {
+    container-type: inline-size;
+}
+
+.contenido > *,
+.contenido dialog form > *,
+.contenido :is(.equipo-card, .devolucion-card),
+.contenido :is(input, select, textarea) {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.contenido :is(h1, h2, p, label, button) {
+    overflow-wrap: anywhere;
+}
+
+.tabla-desplazable {
+    width: 100%;
+    overscroll-behavior-x: contain;
+}
+
+.contenido button {
+    white-space: normal;
+}
+
+@container (max-width: 720px) {
+    .contenido :is(#inventarioTable, #usuariosTable, #historialTable).tabla-adaptable {
+        display: block;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .tabla-desplazable {
+        border: 0;
+        overflow: visible;
+    }
+
+    .tabla-adaptable thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+
+    .tabla-adaptable tbody {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .contenido .tabla-adaptable tbody tr {
+        display: block;
+        min-width: 0;
+        padding: 0.35rem 0.85rem;
+        border: 1px solid var(--borde-suave);
+        border-radius: var(--radio-menu);
+        background: var(--fondo-fila, var(--fondo-campo));
+    }
+
+    .contenido .tabla-adaptable td {
+        display: grid;
+        grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.4fr);
+        gap: 0.75rem;
+        width: 100%;
+        max-width: none;
+        padding: 0.75rem 0;
+        font-size: 0.9rem;
+    }
+
+    .tabla-adaptable td::before {
+        content: attr(data-columna);
+        color: var(--color-acento);
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+
+    .contenido .tabla-adaptable td:first-child {
+        border-top: 0;
+    }
+
+    .contenido :is(#inventarioTable, #usuariosTable) td:last-child {
+        min-width: 0;
+    }
+
+    .contenido .tabla-adaptable td[data-acciones] {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .tabla-adaptable td[data-acciones]::before {
+        flex-basis: 100%;
+    }
+
+    .contenido .tabla-adaptable td button {
+        flex: 1 1 5rem;
+        min-height: 44px;
+        margin: 0;
+        padding: 0.65rem;
+    }
+
+    .contenido .tabla-adaptable td[data-resumen] {
+        display: block;
+    }
+
+    .tabla-adaptable td[data-resumen]::before {
+        content: none;
+    }
+}
+
+@media (max-width: 700px) {
+    .contenido :is(input:not([type="hidden"]), select, textarea) {
+        font-size: 1rem;
+    }
+
+    .contenido button {
+        min-height: 44px;
+    }
+
+    .encabezado-modulo {
+        align-items: stretch;
+    }
+
+    .encabezado-modulo button,
+    .contenido :is(.acciones, .acciones-devolucion) button {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+
+    .buscador-inventario {
+        justify-items: stretch;
+    }
+
+    .contenido input[type="search"] {
+        max-width: none;
+    }
+
+    .contenido dialog {
+        width: calc(100vw - 1rem);
+        max-width: calc(100vw - 1rem);
+        max-height: calc(100dvh - 1rem);
+        padding: 1rem;
+    }
+
+    .contenido dialog h2 {
+        padding-right: 0;
+        clear: both;
+    }
+
+    .contenido dialog > button:first-child {
+        min-height: 44px;
+    }
+
+    .contenido dialog form > button[type="submit"] {
+        width: 100%;
+    }
+
+    #formularioUsuario {
+        grid-template-columns: 1fr;
+    }
+
+    .campo-en-linea {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .campo-en-linea :is(input, select) {
+        flex: none;
+    }
+
+    .equipo-card,
+    .devolucion-card {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .contenido .tabla-adaptable td {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.2rem;
+    }
+
+    .devolucion-card dl {
+        grid-template-columns: 1fr;
+    }
+
+    .devolucion-card dd {
+        margin-bottom: 0.4rem;
+        text-align: left;
+    }
+}
+
+@media (max-width: 700px) {
+    .contenido :is(#Paginacion, #paginasUsuarios) {
+        max-width: 100%;
+        padding: 0.3rem;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+    }
+
+    .contenido :is(#Paginacion, #paginasUsuarios) button {
+        flex: 0 0 auto;
+    }
+}

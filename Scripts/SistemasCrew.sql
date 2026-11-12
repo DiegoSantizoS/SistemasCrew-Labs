@@ -416,7 +416,7 @@ INSERT INTO Accion (Nombre_Accion) VALUES
 
 -- Permisos iniciales para el middleware de autenticación.
 -- Ejecutar en la base existente del proyecto. No elimina datos.
--- Se puede repetir: conserva los permisos y asignaciones existentes.
+-- Se puede repetir: conserva las asignaciones excepto inventario para Usuario.
 -- Requiere los roles, módulos y acciones de SistemasCrew.sql.
 START TRANSACTION;
 
@@ -429,6 +429,7 @@ WHERE m.Nombre_Modulo IN ('Equipos', 'Prestamos', 'Devoluciones')
       SELECT 1 FROM Permiso p
       WHERE p.Id_Accion = a.Id_Accion AND p.Id_Modulo = m.Id_Modulo
   );
+
 
 INSERT INTO Rol_Permiso (Id_Rol, Id_Permiso)
 SELECT r.Id_Rol, p.Id_Permiso
@@ -443,9 +444,7 @@ WHERE (
         OR (m.Nombre_Modulo = 'Devoluciones' AND a.Nombre_Accion = 'Leer')
     ))
     OR (r.Nombre_Rol = 'Usuario' AND (
-        (m.Nombre_Modulo = 'Equipos' AND a.Nombre_Accion = 'Leer')
-        OR (m.Nombre_Modulo = 'Prestamos' AND a.Nombre_Accion IN ('Leer', 'Crear'))
-        OR (m.Nombre_Modulo = 'Devoluciones' AND a.Nombre_Accion = 'Leer')
+        (m.Nombre_Modulo = 'Prestamos' AND a.Nombre_Accion IN ('Leer', 'Crear'))
     ))
 )
 AND NOT EXISTS (
