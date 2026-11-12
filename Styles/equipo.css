@@ -1,12 +1,12 @@
 .equipo {
-    --equipo-fondo: var(--fondo-pagina);
-    --perfil-fondo: var(--fondo-panel);
-    --perfil-acento: var(--fondo-boton);
-    --perfil-texto: var(--texto-principal);
-    --perfil-texto-suave: var(--texto-suave);
-    --perfil-foto-fondo: var(--fondo-campo);
-    --perfil-borde: var(--borde-panel);
-    --perfil-texto-boton: var(--texto-principal);
+    --equipo-fondo: var(--acceso-fondo-pagina);
+    --perfil-fondo: var(--acceso-fondo-formulario);
+    --perfil-acento: var(--acceso-fondo-boton);
+    --perfil-texto: var(--acceso-texto-principal);
+    --perfil-texto-suave: var(--acceso-texto-secundario);
+    --perfil-foto-fondo: var(--acceso-fondo-campo);
+    --perfil-borde: var(--acceso-borde-formulario);
+    --perfil-texto-boton: var(--acceso-texto-principal);
     --perfil-radio: 20px;
     --perfil-foto-tamano: 130px;
     --perfil-tiempo: 0.3s;
@@ -98,7 +98,7 @@
     height: 100%;
     border-radius: 50%;
     background: var(--perfil-foto-fondo);
-    color: var(--color-acento);
+    color: var(--acceso-color-enlace);
     font-size: 2.5rem;
     font-weight: bold;
     object-fit: cover;
@@ -156,9 +156,9 @@
 }
 
 .perfil:not(.sin-efecto) .perfil-boton:not(:disabled):hover {
-    background: var(--fondo-boton-activo);
+    background: var(--acceso-fondo-boton-hover);
     color: var(--perfil-texto-boton);
-    border-color: var(--color-foco);
+    border-color: var(--acceso-color-foco);
 }
 
 .perfil-boton:focus-visible {

@@ -1,68 +1,73 @@
 function initHistorial() {
-  obtenerMiHistorial();
-}
+    const buscador = document.getElementById("buscarHistorial");
+    const mensaje = document.getElementById("avisoHistorial");
+    const filas = document.getElementById("filasHistorial");
+    const anterior = document.getElementById("historialAnterior");
+    const siguiente = document.getElementById("historialSiguiente");
+    const indicador = document.getElementById("paginaHistorial");
+    const formularioFiltro = document.getElementById("filtroHistorial");
+    let solicitudActual = 0;
+    let temporizador;
 
-async function obtenerMiHistorial(pagina = 1) {
-  const aviso = document.querySelector("#avisoHistorial");
-  const filas = document.querySelector("#filasHistorial");
-  const anterior = document.querySelector("#historialAnterior");
-  const siguiente = document.querySelector("#historialSiguiente");
-  const indicador = document.querySelector("#paginaHistorial");
-  anterior.disabled = true;
-  siguiente.disabled = true;
-  indicador.textContent = "";
+    async function cargarHistorial(pagina = 1) {
+        if (!buscador.isConnected) return;
+        const solicitud = ++solicitudActual;
+        const busqueda = buscador.value.trim();
+        const vigente = () => solicitud === solicitudActual && buscador === document.getElementById("buscarHistorial");
+        anterior.disabled = siguiente.disabled = true;
+        indicador.textContent = "";
+        mensaje.textContent = "Cargando historial...";
+        filas.replaceChildren();
+        try {
+            const parametros = new URLSearchParams({ pagina, buscar: busqueda });
+            const respuesta = await fetch("api/admin/Historial.php?" + parametros, { credentials: "same-origin", cache: "no-store" });
+            if (!vigente()) return;
+            if (respuesta.status === 401) {
+                location.assign("login.php");
+                return;
+            }
+            const resultado = await respuesta.json();
+            if (!vigente()) return;
+            if (!respuesta.ok) throw new Error(resultado.message || "No se pudo cargar el historial.");
+            document.getElementById("tituloHistorial").textContent = resultado.es_admin ? "Todos los pr\u00e9stamos" : "Mis pr\u00e9stamos";
+            document.getElementById("columnaUsuarioHistorial").hidden = !resultado.es_admin;
+            for (const prestamo of resultado.data) {
+                const fila = document.createElement("tr");
+                const valores = [prestamo.id, ...(resultado.es_admin ? [prestamo.usuario] : []), prestamo.fecha, prestamo.vencimiento, prestamo.estado, prestamo.motivo];
+                for (const valor of valores) {
+                    const celda = document.createElement("td");
+                    celda.textContent = valor ?? "";
+                    fila.appendChild(celda);
+                }
+                filas.appendChild(fila);
+            }
+            mensaje.textContent = busqueda
+                ? `${resultado.total} pr\u00e9stamo(s) coinciden con "${busqueda}".`
+                : (resultado.data.length ? `${resultado.total} pr\u00e9stamo(s) en total.` : "No hay prestamos para mostrar.");
+            indicador.textContent = `P\u00e1gina ${resultado.pagina} de ${resultado.paginas}`;
+            anterior.disabled = resultado.pagina <= 1;
+            siguiente.disabled = resultado.pagina >= resultado.paginas;
+            anterior.onclick = () => cargarHistorial(resultado.pagina - 1);
+            siguiente.onclick = () => cargarHistorial(resultado.pagina + 1);
+        } catch (error) {
+            if (vigente()) mensaje.textContent = error.message;
+        }
+    }
 
-  aviso.textContent = "Cargando historial…";
-  filas.replaceChildren();
-
-  try {
-    const response = await fetch(`api/admin/Historial.php?pagina=${pagina}`, {
-      credentials: "same-origin",
+    formularioFiltro.addEventListener("submit", (evento) => {
+        evento.preventDefault();
+        clearTimeout(temporizador);
+        cargarHistorial(1);
     });
 
-    if (response.status === 401) {
-      location.assign("login.php");
-      return;
-    }
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.message || "No se pudo cargar el historial.");
-    }
-    if (!filas.isConnected) return;
-    document.querySelector("#tituloHistorial").textContent = result.es_admin
-      ? "Todos los préstamos" : "Mis préstamos";
-    document.querySelector("#columnaUsuarioHistorial").hidden = !result.es_admin;
-
-    for (const prestamo of result.data) {
-      const fila = document.createElement("tr");
-
-      for (const valor of [
-        prestamo.id,
-        ...(result.es_admin ? [prestamo.usuario] : []),
-        prestamo.fecha,
-        prestamo.vencimiento,
-        prestamo.estado,
-        prestamo.motivo,
-      ]) {
-        const celda = document.createElement("td");
-        celda.textContent = valor ?? "—";
-        fila.appendChild(celda);
-      }
-
-      filas.appendChild(fila);
-    }
-
-    aviso.textContent = result.data.length
-      ? `${result.total} préstamo(s) en total.`
-      : "No hay préstamos para mostrar.";
-    indicador.textContent = `Página ${result.pagina} de ${result.paginas}`;
-    anterior.disabled = result.pagina <= 1;
-    siguiente.disabled = result.pagina >= result.paginas;
-    anterior.onclick = () => obtenerMiHistorial(result.pagina - 1);
-    siguiente.onclick = () => obtenerMiHistorial(result.pagina + 1);
-  } catch (error) {
-    aviso.textContent = error.message;
-  }
+    buscador.addEventListener("input", () => {
+        clearTimeout(temporizador);
+        solicitudActual++;
+        filas.replaceChildren();
+        anterior.disabled = siguiente.disabled = true;
+        indicador.textContent = "";
+        mensaje.textContent = "Buscando...";
+        temporizador = setTimeout(() => cargarHistorial(1), 250);
+    });
+    return cargarHistorial();
 }

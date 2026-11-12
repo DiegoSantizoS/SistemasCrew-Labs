@@ -5,7 +5,8 @@ const vistasMenu = {
     inventario: "InventarioNav",
     prestamos: "PrestamosNav",
     devoluciones: "DevolucionesNav",
-    historial: "HistorialNav"
+    historial: "HistorialNav",
+    usuarios: "UsuariosNav"
 };
 
 function cambiarMenu(expandido) {
@@ -40,9 +41,4 @@ document.querySelectorAll("[data-vista]").forEach((enlace) => {
         });
         if (window.matchMedia("(max-width: 700px)").matches) cambiarMenu(false);
     });
-});
-
-document.getElementById("PerfilImg").addEventListener("click", (evento) => {
-    const visible = document.getElementById("PerfilNav").classList.contains("mostrar");
-    evento.currentTarget.setAttribute("aria-expanded", String(visible));
 });
