@@ -8,6 +8,14 @@ WHERE NOT EXISTS (
     SELECT 1 FROM Permiso p WHERE p.Id_Accion = a.Id_Accion AND p.Id_Modulo = m.Id_Modulo
 );
 
+-- Retira cualquier permiso previo de inventario del rol Usuario.
+DELETE rp
+FROM Rol_Permiso rp
+JOIN Rol r ON r.Id_Rol = rp.Id_Rol
+JOIN Permiso p ON p.Id_Permiso = rp.Id_Permiso
+JOIN Modulo m ON m.Id_Modulo = p.Id_Modulo
+WHERE r.Nombre_Rol = 'Usuario' AND m.Nombre_Modulo = 'Equipos';
+
 INSERT INTO Rol_Permiso (Id_Rol, Id_Permiso)
 SELECT r.Id_Rol, p.Id_Permiso
 FROM Rol r CROSS JOIN Permiso p
@@ -21,8 +29,7 @@ WHERE (
         OR (m.Nombre_Modulo IN ('Usuarios', 'Reportes') AND a.Nombre_Accion = 'Leer')
     ))
     OR (r.Nombre_Rol = 'Usuario' AND (
-        (m.Nombre_Modulo = 'Equipos' AND a.Nombre_Accion = 'Leer')
-        OR (m.Nombre_Modulo = 'Prestamos' AND a.Nombre_Accion IN ('Crear', 'Leer'))
+        (m.Nombre_Modulo = 'Prestamos' AND a.Nombre_Accion IN ('Crear', 'Leer'))
     ))
 )
 AND NOT EXISTS (
