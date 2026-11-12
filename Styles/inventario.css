@@ -40,6 +40,22 @@
     gap: 0.5rem;
 }
 
+.campo-codigo-equipo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.campo-codigo-equipo input {
+    flex: 1;
+    min-width: 0;
+}
+
+#prefijoCodigoEquipo {
+    font-weight: 700;
+    white-space: nowrap;
+}
+
 #DetalleEquipo,
 #datosDetalleUsuario {
     display: grid;

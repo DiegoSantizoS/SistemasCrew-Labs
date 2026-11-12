@@ -290,6 +290,7 @@ async function ObtenerCategorias() {
 
       option.value = categoria.Id_Categoria;
       option.textContent = categoria.Nombre_Categoria;
+      option.dataset.prefijoCodigo = categoria.Prefijo_Codigo ?? "";
 
       selectCategoria.appendChild(option);
     });
@@ -333,6 +334,21 @@ async function ObtenerEstadosEquipo() {
   }
 }
 
+function actualizarPrefijoCodigo() {
+  const categoria = form.querySelector("#categoria");
+  const codigo = form.querySelector("#codigo");
+  const prefijo = form.querySelector("#prefijoCodigoEquipo");
+  const editando = action === "EDITAR";
+  const prefijoCategoria = categoria.selectedOptions[0]?.dataset.prefijoCodigo || "EQ-";
+
+  prefijo.hidden = editando;
+  prefijo.textContent = editando ? "" : prefijoCategoria;
+  form.querySelector("#etiquetaCodigoEquipo").textContent = editando
+    ? "Código del equipo"
+    : "Sufijo del código del equipo";
+  codigo.disabled = !editando && !categoria.value;
+}
+
 function cargarModal() {
   form = document.querySelector("#equipoForm");
 
@@ -350,6 +366,8 @@ function cargarModal() {
     return;
   }
 
+  form.querySelector("#categoria").addEventListener("change", actualizarPrefijoCodigo);
+
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -363,6 +381,7 @@ function cargarModal() {
   abrir.addEventListener("click", () => {
     action = "GUARDAR";
     form.reset();
+    actualizarPrefijoCodigo();
     modal.showModal();
   });
 
@@ -376,6 +395,8 @@ async function nuevoEquipo() {
   const URL = API_RUTA("Equipos");
 
   const data = new FormData(form);
+  data.set("sufijo", data.get("codigo") ?? "");
+  data.delete("codigo");
   try {
     const response = await inventoryFetch(URL, {
       method: "POST",
@@ -384,6 +405,7 @@ async function nuevoEquipo() {
     const result = await response.json();
     alert(result.message);
     form.reset();
+    actualizarPrefijoCodigo();
     await TablaPaginada(true);
   } catch (error) {
     alert("Error al enviar el formulario:" + error);
@@ -413,8 +435,9 @@ async function editarEquipo(codigo) {
     form.querySelector("#serie").value = equipo.Serie;
     form.querySelector("#descripcion").value = equipo.Descripcion;
 
-    modal.showModal();
     action = "EDITAR";
+    actualizarPrefijoCodigo();
+    modal.showModal();
   } catch (error) {
     alert("Error al obtener los datos del equipo");
   }

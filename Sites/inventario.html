@@ -7,13 +7,16 @@
   <button id="cerrarModal">Cerrar</button>
   <form method="dialog" action="http://localhost/SistemasCrew-Labs/api/admin/Equipos.php" id="equipoForm">
     <input type="hidden" id="id_equipo" name="id_equipo">
-    <label for="codigo">Codigo Equipo:</label>
-    <input type="text" id="codigo" name="codigo" required />
-
     <label for="categoria">Categoria:</label>
     <select id="categoria" name="categoria" required> 
       <option value="">Seleccione una categoria</option>
     </select>
+
+    <label for="codigo" id="etiquetaCodigoEquipo">Sufijo del código del equipo</label>
+    <div class="campo-codigo-equipo">
+      <span id="prefijoCodigoEquipo" aria-live="polite">EQ-</span>
+      <input type="text" id="codigo" name="codigo" aria-describedby="prefijoCodigoEquipo" disabled required />
+    </div>
 
     <span class="campo-en-linea">
       <label for="ubicacion">Ubicación:</label>

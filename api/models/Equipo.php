@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/Categorias.php';
+
 class Equipo
 {
     private connection $connection;
@@ -63,8 +65,26 @@ class Equipo
     //Función para añadir un nuevo equipo
     function add($arrayData)
     {
-        $Codigo = $arrayData['codigo'];
         $Categoria = $arrayData['categoria'];
+        $consultaCategoria = $this->connection->prepare(
+            "SELECT Nombre_Categoria FROM Categoria WHERE Id_Categoria = :categoria AND Activo = 1"
+        );
+        $consultaCategoria->execute(['categoria' => $Categoria]);
+        $nombreCategoria = $consultaCategoria->fetchColumn();
+        if ($nombreCategoria === false) {
+            $this->response->error("Selecciona una categoría activa.", 2002, 422);
+        }
+
+        $prefijo = Categorias::prefijoCodigoEquipo($nombreCategoria);
+        if ($prefijo === null) {
+            $this->response->error("El nombre de la categoría debe contener letras para generar el código.", 2002, 422);
+        }
+
+        $Codigo = $prefijo . trim($arrayData['sufijo']);
+        if (mb_strlen($Codigo, 'UTF-8') > 50) {
+            $this->response->error("El código completo del equipo admite hasta 50 caracteres.", 2002, 422);
+        }
+
         $Ubicacion = $arrayData['ubicacion'];
         $Estado = $arrayData['estado'];
         $Marca = $arrayData['marca'] ?? null;
