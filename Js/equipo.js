@@ -1,17 +1,17 @@
-document.querySelectorAll(".perfil").forEach((tarjeta) => {
-    tarjeta.querySelectorAll("a.perfil-boton").forEach((enlace) => {
-        enlace.addEventListener("click", () => {
-            tarjeta.classList.add("sin-efecto");
+document.querySelectorAll(".perfil").forEach((tarjetaIntegrante) => {
+    tarjetaIntegrante.querySelectorAll("a.perfil-boton").forEach((enlacePerfil) => {
+        enlacePerfil.addEventListener("click", () => {
+            tarjetaIntegrante.classList.add("sin-efecto");
         });
     });
 
-    tarjeta.addEventListener("pointerenter", () => {
-        tarjeta.classList.remove("sin-efecto");
+    tarjetaIntegrante.addEventListener("pointerenter", () => {
+        tarjetaIntegrante.classList.remove("sin-efecto");
     });
 
-    tarjeta.addEventListener("focusin", (evento) => {
-        if (evento.target.matches(":focus-visible")) {
-            tarjeta.classList.remove("sin-efecto");
+    tarjetaIntegrante.addEventListener("focusin", (eventoFoco) => {
+        if (eventoFoco.target.matches(":focus-visible")) {
+            tarjetaIntegrante.classList.remove("sin-efecto");
         }
     });
 });

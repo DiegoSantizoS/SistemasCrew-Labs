@@ -1,7 +1,3 @@
-const PerfilImg = document.getElementById("PerfilImg");
-const PerfilNav = document.getElementById("PerfilNav");
-PerfilImg.addEventListener("click", () => PerfilNav.classList.toggle("mostrar"));
-
 let navegacionActual = 0;
 
 function conectarSeccion(id, ruta, titulo, inicializar) {
@@ -14,7 +10,7 @@ function conectarSeccion(id, ruta, titulo, inicializar) {
     document.querySelector(".Bienvenida").style.display = "none";
     contenido.textContent = "Cargando…";
     try {
-      const response = await fetch(ruta);
+      const response = await fetch(ruta, { cache: "no-store" });
       if (!response.ok) throw new Error(`No se pudo cargar ${titulo}.`);
       const html = await response.text();
       if (solicitud !== navegacionActual) return;
@@ -38,3 +34,5 @@ conectarSeccion("InventarioNav", "Sites/inventario.html", "Inventario", initInve
 conectarSeccion("PrestamosNav", "Sites/prestamos.html", "Préstamos", initPrestamos);
 conectarSeccion("DevolucionesNav", "Sites/devoluciones.html", "Devoluciones", initDevoluciones);
 conectarSeccion("HistorialNav", "Sites/historial.html", "Historial", initHistorial);
+
+conectarSeccion("UsuariosNav", "Sites/usuarios.html", "Usuarios", initUsuarios);

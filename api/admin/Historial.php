@@ -16,10 +16,15 @@ $pagina = filter_var($_GET['pagina'] ?? '1', FILTER_VALIDATE_INT, [
     'options' => ['min_range' => 1, 'max_range' => 1000000]
 ]);
 if ($pagina === false) Response::error('Página no válida.', -422, 422);
+$busqueda = $_GET['buscar'] ?? '';
+if (!is_string($busqueda) || mb_strlen($busqueda) > 100) {
+    Response::error('La busqueda admite hasta 100 caracteres.', -422, 422);
+}
+$busqueda = trim($busqueda);
 $esAdmin = $user['role']['name'] === 'Administrador';
 try{
     $historial = new Historial($connection, $response);
-    $resultado = $historial->getPagina($esAdmin ? null : $user['id'], $pagina);
+    $resultado = $historial->getPagina($esAdmin ? null : $user['id'], $pagina, 10, $busqueda);
 
     $response->success("Historial obtenido correctamente", $resultado['prestamos'], 1, [
         'pagina' => $resultado['pagina'], 'paginas' => $resultado['paginas'],
