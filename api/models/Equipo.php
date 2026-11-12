@@ -89,7 +89,8 @@ class Equipo
         $Estado = $arrayData['estado'];
         $Marca = $arrayData['marca'] ?? null;
         $Modelo = $arrayData['modelo'] ?? null;
-        $Serie = $arrayData['serie'] ?? null;
+        $Serie = trim($arrayData['serie'] ?? '');
+        $Serie = $Serie === '' ? null : $Serie;
         $Descripcion = $arrayData['descripcion'];
         $Imagen = $arrayData['imagen'] ?? null;
 
@@ -130,7 +131,8 @@ class Equipo
             $Estado = $arrayData['estado'];
             $Marca = $arrayData['marca'] ?? null;
             $Modelo = $arrayData['modelo'] ?? null;
-            $Serie = $arrayData['serie'] ?? null;
+            $Serie = trim($arrayData['serie'] ?? '');
+            $Serie = $Serie === '' ? null : $Serie;
             $Descripcion = $arrayData['descripcion'];
             $Imagen = $arrayData['imagen'] ?? null;
 

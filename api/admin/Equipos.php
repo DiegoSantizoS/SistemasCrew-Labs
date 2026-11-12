@@ -65,9 +65,21 @@ switch ($method) {
         try {
             $equipo = new Equipo($conection, $response);
             $equipo->add($_POST);
+        } catch (PDOException $th) {
+            error_log('Error Equipos.php POST: ' . $th->getMessage());
+            if ((int)($th->errorInfo[1] ?? 0) === 1062) {
+                $response->error('Ya existe un equipo con ese codigo o numero de serie.', 2002, 409);
+            }
+            if ((int)($th->errorInfo[1] ?? 0) === 1452) {
+                $response->error('Selecciona una categoria, ubicacion y estado existentes.', 2002, 422);
+            }
+            if ((int)($th->errorInfo[1] ?? 0) === 1406) {
+                $response->error('Un campo supera su longitud permitida. Usa hasta 100 caracteres en marca, modelo y serie, y 255 en descripcion.', 2002, 422);
+            }
+            $response->error('No se pudo guardar el equipo. Revisa el registro de errores del servidor.', 2002, 500);
         } catch (\Throwable $th) {
-            $response->error("Error al agregar el equipo", 2002, 400);
-            $response->debug(null, $th);
+            error_log('Error Equipos.php POST: ' . $th->getMessage());
+            $response->error("Error al agregar el equipo", 2002, 500);
         }
         break;
     case 'PUT':
@@ -93,6 +105,12 @@ switch ($method) {
             $response->error($th->getMessage(), 2003, 409);
         } catch (OutOfBoundsException $th) {
             $response->error($th->getMessage(), 2005, 404);
+        } catch (PDOException $th) {
+            error_log('Error Equipos.php PUT: ' . $th->getMessage());
+            if ((int)($th->errorInfo[1] ?? 0) === 1062) {
+                $response->error('Ya existe un equipo con ese codigo o numero de serie.', 2003, 409);
+            }
+            $response->error('No se pudo actualizar el equipo.', 2003, 500);
         } catch (\Throwable $th) {
             $response->error("Error al actualizar el equipo", 2003, 400);
         }
