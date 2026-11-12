@@ -1,52 +1,38 @@
-const PerfilImg = document.getElementById("PerfilImg");
-const PerfilNav = document.getElementById("PerfilNav");
+let navegacionActual = 0;
 
-PerfilImg.addEventListener("click", function () {
-  PerfilNav.classList.toggle("mostrar");
+function conectarSeccion(id, ruta, titulo, inicializar) {
+  const elemento = document.getElementById(id);
+  if (!elemento) return;
+  document.getElementById(id).addEventListener("click", async (event) => {
+    event.preventDefault();
+    const solicitud = ++navegacionActual;
+    const contenido = document.querySelector(".Contenido");
+    document.querySelector(".Bienvenida").style.display = "none";
+    contenido.textContent = "Cargando…";
+    try {
+      const response = await fetch(ruta, { cache: "no-store" });
+      if (!response.ok) throw new Error(`No se pudo cargar ${titulo}.`);
+      const html = await response.text();
+      if (solicitud !== navegacionActual) return;
+      contenido.innerHTML = html;
+      document.title = titulo;
+      inicializar();
+    } catch (error) {
+      if (solicitud === navegacionActual) contenido.textContent = error.message;
+    }
+  });
+}
+
+document.getElementById("InicioNav").addEventListener("click", () => {
+  navegacionActual++;
+  document.querySelector(".Contenido").replaceChildren();
+  document.querySelector(".Bienvenida").style.display = "block";
+  document.title = "Inicio";
 });
-let $ = (doc) => document.querySelector(doc);
-let $$ = (doc) => document.querySelectorAll(doc);
 
+conectarSeccion("InventarioNav", "Sites/inventario.html", "Inventario", initInventario);
+conectarSeccion("PrestamosNav", "Sites/prestamos.html", "Préstamos", initPrestamos);
+conectarSeccion("DevolucionesNav", "Sites/devoluciones.html", "Devoluciones", initDevoluciones);
+conectarSeccion("HistorialNav", "Sites/historial.html", "Historial", initHistorial);
 
-function cargarInventario() {
-  let InventarioNav = $("#InventarioNav");
-
-  InventarioNav.addEventListener("click", function () {
-    $(".Bienvenida").style.display = "none";
-
-    fetch("Sites/inventario.html")
-      .then((response) => response.text())
-      .then((html) => {
-        $(".Contenido").innerHTML = html;
-
-        TablaPaginada();
-        ObtenerCategorias();
-        ObtenerUbicaciones();
-        ObtenerEstadosEquipo();
-        cargarModal();
-
-        // Evento para cerrar el modal de preview
-        const cerrarPreview = $("#cerrarPreview");
-
-        if (cerrarPreview) {
-          cerrarPreview.addEventListener("click", CerrarPreview);
-        }
-
-        document.title = "Inventario";
-      })
-      .catch((error) => {
-        alert("Error al cargar el contenido: " + error);
-      });
-  });
-}
-
-function CargarInicio() {
-  let InicioNav = $("#InicioNav");
-  InicioNav.addEventListener("click", function () {
-    $(".Contenido").innerHTML = "";
-    $(".Bienvenida").style.display = "block";
-    document.title = "Inicio";
-  });
-}
-cargarInventario();
-CargarInicio();
+conectarSeccion("UsuariosNav", "Sites/usuarios.html", "Usuarios", initUsuarios);

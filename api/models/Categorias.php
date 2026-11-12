@@ -11,6 +11,17 @@ class Categorias
         $this->response = $response;
     }
 
+    public static function prefijoCodigoEquipo(string $nombre): ?string
+    {
+        $letras = preg_replace('/[^\p{L}]/u', '', $nombre);
+        if ($letras === null || $letras === '') {
+            return null;
+        }
+
+        $iniciales = mb_substr($letras, 0, 3, 'UTF-8');
+        return 'EQ-' . mb_convert_case($iniciales, MB_CASE_UPPER_SIMPLE, 'UTF-8') . '-';
+    }
+
     // Función para obtener todas las categorías
     function getAll()
     {
@@ -18,6 +29,10 @@ class Categorias
         $statement = $this->connection->prepare($query);
         $statement->execute();
         $result = $statement->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($result as &$categoria) {
+            $categoria['Prefijo_Codigo'] = self::prefijoCodigoEquipo($categoria['Nombre_Categoria']);
+        }
+        unset($categoria);
         $this->response->success("Categorías obtenidas correctamente", $result, 1);
     }
     function add($arrayData)

@@ -1,3 +1,14 @@
+function initInventario() {
+  inicializarBuscadorInventario();
+  TablaPaginada();
+  ObtenerCategorias();
+  ObtenerUbicaciones();
+  ObtenerEstadosEquipo();
+  cargarModal();
+  const cerrarPreview = document.querySelector("#cerrarPreview");
+  if (cerrarPreview) cerrarPreview.addEventListener("click", CerrarPreview);
+}
+
 async function inventoryFetch(url, options = {}) {
   const headers = new Headers(options.headers || {});
   headers.set(
@@ -21,6 +32,57 @@ let paginaActual = 1;
 let ultimaPagina = 1;
 let action = "GUARDAR";
 let form = document.querySelector("#equipoForm");
+let solicitudEquipos = 0;
+let textoBusquedaActual = '';
+let cursoresBusqueda = [0];
+let paginaBusqueda = 0;
+
+// Se ejecuta después de insertar el HTML del inventario en la página.
+function inicializarBuscadorInventario() {
+  const buscador = document.querySelector("#buscarEquipo");
+  let temporizador;
+  cursoresBusqueda = [0];
+  paginaBusqueda = 0;
+  textoBusquedaActual = '';
+  solicitudEquipos++;
+  buscador.addEventListener("input", () => {
+    clearTimeout(temporizador);
+    // Invalida respuestas anteriores desde la primera pulsación.
+    solicitudEquipos++;
+    // Cada texto nuevo comienza en la primera página de coincidencias.
+    cursoresBusqueda = [0];
+    paginaBusqueda = 0;
+    document.querySelector("#PaginacionBusqueda").replaceChildren();
+    document.querySelector("#resultadoBusqueda").textContent = "Buscando…";
+    // Espera a que el usuario deje de escribir antes de consultar la API.
+    temporizador = setTimeout(() => ObtenerEquipos(0), 250);
+  });
+}
+
+function mostrarPaginacionBusqueda(paginacion) {
+  const contenedor = document.querySelector("#PaginacionBusqueda");
+  contenedor.replaceChildren();
+  const anterior = document.createElement("button");
+  const siguiente = document.createElement("button");
+  const etiqueta = document.createElement("span");
+  anterior.type = siguiente.type = "button";
+  anterior.textContent = "Anterior";
+  siguiente.textContent = "Siguiente";
+  etiqueta.textContent = ` Página ${paginaBusqueda + 1} `;
+  anterior.disabled = paginaBusqueda === 0;
+  siguiente.disabled = !paginacion.hayMas;
+  const cambiarPagina = (destino) => {
+    anterior.disabled = siguiente.disabled = true;
+    paginaBusqueda = destino;
+    ObtenerEquipos(UltimoId);
+  };
+  anterior.addEventListener("click", () => cambiarPagina(paginaBusqueda - 1));
+  siguiente.addEventListener("click", () => {
+    cursoresBusqueda[paginaBusqueda + 1] = paginacion.siguiente;
+    cambiarPagina(paginaBusqueda + 1);
+  });
+  contenedor.append(anterior, etiqueta, siguiente);
+}
 
 //Función flecha para devolver la url de la api
 let API_RUTA = (controlador) => {
@@ -37,14 +99,14 @@ async function TablaPaginada(irAultimaPagina = false) {
 
     paginaciondiv.innerHTML = "";
     for (let pagina of datos.data) {
-      paginaciondiv.innerHTML += `
-        <button
-          class="Paginador"
-          id="Pagina${pagina.id_Pagina}"
-          data-ultimo-id="${pagina.Ultimo_id_pagina}">
-          ${pagina.id_Pagina}
-        </button>
-      `;
+      const boton = document.createElement("button");
+      boton.type = "button";
+      boton.classList.add("Paginador");
+      boton.id = `Pagina${pagina.id_Pagina}`;
+      boton.dataset.ultimoId = pagina.Ultimo_id_pagina;
+      boton.textContent = pagina.id_Pagina;
+
+      paginaciondiv.appendChild(boton);
     }
 
     const paginasbtn = document.querySelectorAll(".Paginador");
@@ -72,13 +134,48 @@ async function TablaPaginada(irAultimaPagina = false) {
 //Función para mostrar los equipos y renderizarlos en la tabla
 async function ObtenerEquipos(IdFinal = 0) {
   const URL = API_RUTA("Equipos");
+  const buscador = document.querySelector("#buscarEquipo");
+  const busqueda = buscador.value.trim();
+  if (busqueda !== textoBusquedaActual) {
+    textoBusquedaActual = busqueda;
+    cursoresBusqueda = [0];
+    paginaBusqueda = 0;
+    if (busqueda) IdFinal = 0;
+  }
+  if (!busqueda) IdFinal = UltimoId;
+  // Solo la solicitud más reciente puede modificar la tabla visible.
+  const solicitud = ++solicitudEquipos;
+  const sigueVigente = () => solicitud === solicitudEquipos && buscador === document.querySelector("#buscarEquipo");
+  document.querySelector("#Paginacion").hidden = busqueda !== "";
+  let paginacionBusqueda = document.querySelector('#PaginacionBusqueda');
+  if (!paginacionBusqueda) {
+    paginacionBusqueda = document.createElement('div');
+    paginacionBusqueda.id = 'PaginacionBusqueda';
+    document.querySelector('#Paginacion').after(paginacionBusqueda);
+  }
+  paginacionBusqueda.hidden = !busqueda;
   try {
-    const response = await inventoryFetch(`${URL}?ultimo=${IdFinal}`);
+    // URLSearchParams codifica espacios y caracteres especiales del texto.
+    const parametros = new URLSearchParams({
+      ultimo: busqueda ? cursoresBusqueda[paginaBusqueda] : IdFinal,
+      buscar: busqueda
+    });
+    const response = await inventoryFetch(`${URL}?${parametros}`);
     const datos = await response.json();
+    if (!sigueVigente()) return;
     const tabla = document.querySelector("#inventarioTable tbody");
+    document.querySelector("#resultadoBusqueda").textContent = busqueda
+      ? `${datos.data.length} equipo(s) en esta página${datos.has_more ? '; hay más resultados' : ''}.`
+      : "";
+    if (busqueda) mostrarPaginacionBusqueda(datos.paginacion);
 
     //Limpiar la tabla
     tabla.innerHTML = "";
+    if (datos.data.length === 0) {
+      const celda = tabla.insertRow().insertCell();
+      celda.colSpan = 5;
+      celda.textContent = busqueda ? "No se encontraron equipos que coincidan." : "No hay equipos para mostrar.";
+    }
 
     datos.data.forEach((equipo) => {
       let row = tabla.insertRow();
@@ -129,6 +226,8 @@ async function ObtenerEquipos(IdFinal = 0) {
       celdaAccion.appendChild(btnEliminar);
     });
   } catch (error) {
+    if (!sigueVigente()) return;
+    document.querySelector("#resultadoBusqueda").textContent = "No se pudieron cargar los equipos. Intenta nuevamente.";
     alert("Error al cargar los equipos");
   }
 }
@@ -191,6 +290,7 @@ async function ObtenerCategorias() {
 
       option.value = categoria.Id_Categoria;
       option.textContent = categoria.Nombre_Categoria;
+      option.dataset.prefijoCodigo = categoria.Prefijo_Codigo ?? "";
 
       selectCategoria.appendChild(option);
     });
@@ -234,6 +334,21 @@ async function ObtenerEstadosEquipo() {
   }
 }
 
+function actualizarPrefijoCodigo() {
+  const categoria = form.querySelector("#categoria");
+  const codigo = form.querySelector("#codigo");
+  const prefijo = form.querySelector("#prefijoCodigoEquipo");
+  const editando = action === "EDITAR";
+  const prefijoCategoria = categoria.selectedOptions[0]?.dataset.prefijoCodigo || "EQ-";
+
+  prefijo.hidden = editando;
+  prefijo.textContent = editando ? "" : prefijoCategoria;
+  form.querySelector("#etiquetaCodigoEquipo").textContent = editando
+    ? "Código del equipo"
+    : "Sufijo del código del equipo";
+  codigo.disabled = !editando && !categoria.value;
+}
+
 function cargarModal() {
   form = document.querySelector("#equipoForm");
 
@@ -251,6 +366,8 @@ function cargarModal() {
     return;
   }
 
+  form.querySelector("#categoria").addEventListener("change", actualizarPrefijoCodigo);
+
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -264,6 +381,7 @@ function cargarModal() {
   abrir.addEventListener("click", () => {
     action = "GUARDAR";
     form.reset();
+    actualizarPrefijoCodigo();
     modal.showModal();
   });
 
@@ -277,6 +395,8 @@ async function nuevoEquipo() {
   const URL = API_RUTA("Equipos");
 
   const data = new FormData(form);
+  data.set("sufijo", data.get("codigo") ?? "");
+  data.delete("codigo");
   try {
     const response = await inventoryFetch(URL, {
       method: "POST",
@@ -285,6 +405,7 @@ async function nuevoEquipo() {
     const result = await response.json();
     alert(result.message);
     form.reset();
+    actualizarPrefijoCodigo();
     await TablaPaginada(true);
   } catch (error) {
     alert("Error al enviar el formulario:" + error);
@@ -294,7 +415,7 @@ async function editarEquipo(codigo) {
   const URL = API_RUTA("Equipos");
   let modal = document.querySelector("#ModalEquipos");
 
-  try{
+  try {
     const response = await inventoryFetch(`${URL}?codigo=${encodeURIComponent(codigo)}`);
     const datos = await response.json();
     if (!response.ok || !datos.data || Array.isArray(datos.data)) {
@@ -314,8 +435,9 @@ async function editarEquipo(codigo) {
     form.querySelector("#serie").value = equipo.Serie;
     form.querySelector("#descripcion").value = equipo.Descripcion;
 
-    modal.showModal();
     action = "EDITAR";
+    actualizarPrefijoCodigo();
+    modal.showModal();
   } catch (error) {
     alert("Error al obtener los datos del equipo");
   }

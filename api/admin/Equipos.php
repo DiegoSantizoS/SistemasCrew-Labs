@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/../helpers/auth.php';
-//auth_admin();
+require_once __DIR__ . '/../auth/auth.middleWare.php';
+$user = requirePermission('Equipos');
 require_once(__DIR__ . "/../core/Connection.php");
 require_once(__DIR__ . "/../models/Equipo.php");
 require_once(__DIR__ . "/../core/Response.php");
@@ -12,6 +12,15 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
     case 'GET':
+        if (isset($_GET['codigo']) && (!is_string($_GET['codigo']) || mb_strlen($_GET['codigo']) > 50)) {
+            $response->error('Código de equipo no válido.', -422, 422);
+        }
+        if (isset($_GET['ultimo']) && filter_var($_GET['ultimo'], FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]) === false) {
+            $response->error('Índice de página no válido.', -422, 422);
+        }
+        if (isset($_GET['buscar']) && (!is_string($_GET['buscar']) || mb_strlen($_GET['buscar']) > 150)) {
+            $response->error('Búsqueda no válida. Usa hasta 150 caracteres.', -422, 422);
+        }
         try {
             $equipo = new Equipo($conection, $response);
 
@@ -20,8 +29,19 @@ switch ($method) {
                 $equipo->getAll(trim($_GET['codigo']));
             } else {
                 // Listado resumido para la tabla
-                $ultimoid = (int) ($_GET['ultimo'] ?? 0);
-                $equipo->getPreview($ultimoid);
+                // Valida también solicitudes directas que no pasan por el formulario.
+                $ultimoid = filter_var($_GET['ultimo'] ?? 0, FILTER_VALIDATE_INT, [
+                    'options' => ['min_range' => 0]
+                ]);
+                if ($ultimoid === false || !is_string($_GET['buscar'] ?? '')) {
+                    $response->error("Parámetros de búsqueda no válidos", 2006, 422);
+                }
+                // El texto de búsqueda es opcional: vacío conserva el listado por páginas.
+                $busqueda = trim($_GET['buscar'] ?? '');
+                if (mb_strlen($busqueda) > 100) {
+                    $response->error("La búsqueda admite hasta 100 caracteres", 2006, 422);
+                }
+                $equipo->getPreview($ultimoid, $busqueda);
             }
         } catch (\Throwable $th) {
             error_log('Error Equipos.php: ' . $th->getMessage());
@@ -34,19 +54,13 @@ switch ($method) {
         }
         break;
     case 'POST':
-        $codigo = $_POST['codigo'] ?? null;
-        $categoria = $_POST['categoria'] ?? null;
-        $ubicacion = $_POST['ubicacion'] ?? null;
-        $estado = $_POST['estado'] ?? null;
-        $marca = $_POST['marca'] ?? null;
-        $modelo = $_POST['modelo'] ?? null;
-        $serie = $_POST['serie'] ?? null;
-        $descripcion = $_POST['descripcion'] ?? null;
-        $imagen = $_POST['imagen'] ?? null;
-
-        if (empty(trim($codigo)) || empty(trim($categoria)) || empty(trim($ubicacion)) || empty(trim($estado)) || empty(trim($descripcion))) {
-            $response->error("Faltan datos obligatorios", 2002, 400);
-            die();
+        foreach (['sufijo', 'categoria', 'ubicacion', 'estado', 'descripcion'] as $campo) {
+            if (!isset($_POST[$campo]) || !is_string($_POST[$campo]) || trim($_POST[$campo]) === '') {
+                $response->error("Faltan datos obligatorios", 2002, 400);
+            }
+        }
+        if (filter_var($_POST['categoria'], FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) === false) {
+            $response->error("Selecciona una categoría válida.", 2002, 422);
         }
         try {
             $equipo = new Equipo($conection, $response);
@@ -75,6 +89,10 @@ switch ($method) {
         try {
             $equipo = new Equipo($conection, $response);
             $equipo->update($_PUT);
+        } catch (DomainException $th) {
+            $response->error($th->getMessage(), 2003, 409);
+        } catch (OutOfBoundsException $th) {
+            $response->error($th->getMessage(), 2005, 404);
         } catch (\Throwable $th) {
             $response->error("Error al actualizar el equipo", 2003, 400);
         }
@@ -92,6 +110,10 @@ switch ($method) {
             $equipo->delete([
                 'Codigo' => $Codigo
             ]);
+        } catch (DomainException $th) {
+            $response->error($th->getMessage(), 2004, 409);
+        } catch (OutOfBoundsException $th) {
+            $response->error($th->getMessage(), 2005, 404);
         } catch (\Throwable $th) {
             $response->error("Error al eliminar el equipo", 2004, 400);
         }

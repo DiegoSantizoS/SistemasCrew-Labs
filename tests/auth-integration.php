@@ -8,12 +8,14 @@ $stamp='authcheck_'.bin2hex(random_bytes(5));
 $email=$stamp.'@example.com';
 $d=['nombres'=>'Prueba','apellidos'=>'Autenticación','telefono'=>'','carnet'=>$stamp,'username'=>$stamp,'email'=>$email,'password'=>' Pass12345 ','confirm'=>' Pass12345 '];
 $cookie=tempnam(sys_get_temp_dir(),'auth');
+$temporaryRole = null;
 $base=getenv('AUTH_TEST_URL') ?: 'http://localhost/SistemasCrew-Labs/';
-function request($route,$data=null,$method=null) {
+function request($route,$data=null,$method=null,$headers=[]) {
     global $cookie,$base;
     $ch=curl_init($base.$route);
     curl_setopt_array($ch,[CURLOPT_RETURNTRANSFER=>true,CURLOPT_COOKIEJAR=>$cookie,CURLOPT_COOKIEFILE=>$cookie,CURLOPT_FOLLOWLOCATION=>false]);
-    if ($data !== null) {curl_setopt($ch,CURLOPT_POST,true);curl_setopt($ch,CURLOPT_POSTFIELDS,json_encode($data));curl_setopt($ch,CURLOPT_HTTPHEADER,['Content-Type: application/json']);}
+    if ($data !== null) {curl_setopt($ch,CURLOPT_POST,true);curl_setopt($ch,CURLOPT_POSTFIELDS,json_encode($data));$headers[]='Content-Type: application/json';}
+    if ($headers) curl_setopt($ch,CURLOPT_HTTPHEADER,$headers);
     if ($method) curl_setopt($ch,CURLOPT_CUSTOMREQUEST,$method);
     $body=curl_exec($ch);$code=curl_getinfo($ch,CURLINFO_RESPONSE_CODE);curl_close($ch);return [$code,$body];
 }
@@ -46,7 +48,6 @@ try {
         $q=$db->prepare('SELECT COUNT(*) FROM Persona WHERE Correo_Persona=?');$q->execute(['race_'.$email]);
         if ($q->fetchColumn()!=0) throw new RuntimeException('Uniqueness violation left orphan');
     }
-    expect('wrong password',request('api/auth/login.php',['csrf'=>$d['csrf'],'email'=>$email,'password'=>'wrong']),401);
     foreach (['Inactivo','Bloqueado'] as $state) {
         $q=$db->prepare('UPDATE Usuario SET Id_Estado=(SELECT Id_Estado FROM Estado_Usuario WHERE Estado_Usuario=? LIMIT 1) WHERE Id_Usuario=?');$q->execute([$state,$u['Id_Usuario']]);
         expect($state,request('api/auth/login.php',['csrf'=>$d['csrf'],'email'=>$email,'password'=>$d['password']]),401);
@@ -54,21 +55,58 @@ try {
     $db->prepare("UPDATE Usuario SET Id_Estado=(SELECT Id_Estado FROM Estado_Usuario WHERE Estado_Usuario='Activo' LIMIT 1) WHERE Id_Usuario=?")->execute([$u['Id_Usuario']]);
     $result=expect('correct login',request('api/auth/login.php',['csrf'=>$d['csrf'],'email'=>$email,'password'=>$d['password']]),200);
     if ($result['data']['redirect']!=='/SistemasCrew-Labs/index.php') throw new RuntimeException('Wrong redirect');
+    if ($result['data']['id'] !== (int)$u['Id_Usuario']) throw new RuntimeException('Login ID mismatch');
+    $me = expect('cookie identity', request('api/auth/me.php'), 200);
+    if ($me['data']['id'] !== (int)$u['Id_Usuario']) throw new RuntimeException('Cookie ID mismatch');
     $dash=request('index.php');expect('session persistence',$dash,200);
     expect('authenticated login redirect',request('login.php'),302);
     preg_match('/name="csrf-token" content="([a-f0-9]+)"/',$dash[1],$m);$csrf=$m[1];
+    $db->prepare("UPDATE Usuario SET Id_Estado=(SELECT Id_Estado FROM Estado_Usuario WHERE Estado_Usuario='Inactivo' LIMIT 1) WHERE Id_Usuario=?")->execute([$u['Id_Usuario']]);
+    expect('deactivated user redirected from dashboard', request('index.php'), 302);
+    expect('deactivated user can open login without redirect loop', request('login.php'), 200);
+    expect('deactivated session rejected by API', request('api/auth/me.php'), 401);
+    $db->prepare("UPDATE Usuario SET Id_Estado=(SELECT Id_Estado FROM Estado_Usuario WHERE Estado_Usuario='Activo' LIMIT 1) WHERE Id_Usuario=?")->execute([$u['Id_Usuario']]);
+    expect('reactivated user signs in again', request('api/auth/login.php', ['csrf'=>token(), 'email'=>$email, 'password'=>$d['password']]), 200);
+    $dash = request('index.php');
+    preg_match('/name="csrf-token" content="([a-f0-9]+)"/', $dash[1], $m); $csrf = $m[1];
+    expect('wrong password',request('api/auth/login.php',['csrf'=>$csrf,'email'=>$email,'password'=>'wrong']),401);
     foreach (['Equipos','Categorias','Ubicaciones','Estados_Equipo','PaginasEquipos'] as $endpoint) expect('inventory read '.$endpoint,request('api/admin/'.$endpoint.'.php'),200);
+    $page = expect('bounded equipment results', request('api/admin/Equipos.php?buscar=a&limit=100000'),200);
+    if (count($page['data']) > 10) throw new RuntimeException('Unbounded inventory response');
+    if ($page['has_more']) {
+        $next = expect('search cursor pagination',request('api/admin/Equipos.php?buscar=a&ultimo=' . $page['next_cursor']),200);
+        if (count($next['data']) > 10 || array_intersect(array_column($page['data'],'Codigo'),array_column($next['data'],'Codigo'))) throw new RuntimeException('Invalid search pagination');
+    }
+    expect('array search rejected',request('api/admin/Equipos.php?buscar[]=a'),422);
+    expect('negative page rejected',request('api/admin/Equipos.php?ultimo=-1'),422);
+    expect('array code rejected',request('api/admin/Equipos.php?codigo[]=a'),422);
     expect('ordinary user cannot write',request('api/admin/Equipos.php',[]),403);
+    $db->prepare('INSERT INTO Rol (Nombre_Rol) VALUES (?)')->execute([$stamp]);
+    $temporaryRole = (int)$db->lastInsertId();
+    $db->prepare('UPDATE Usuario SET Id_Rol=? WHERE Id_Usuario=?')->execute([$temporaryRole,$u['Id_Usuario']]);
+    expect('role without assigned permission cannot read', request('api/admin/Equipos.php'), 403);
+    expect('role without loan permission cannot read', request('api/admin/Prestamos.php'), 403);
+    expect('identity remains valid without module permission', request('api/auth/me.php'), 200);
+    $db->prepare("UPDATE Usuario SET Id_Rol=(SELECT Id_Rol FROM Rol WHERE Nombre_Rol='Encargado' LIMIT 1) WHERE Id_Usuario=?")->execute([$u['Id_Usuario']]);
+    expect('encargado cannot delete', request('api/admin/Equipos.php?codigo=nonexistent',null,'DELETE',['X-CSRF-Token: '.$csrf]),403);
     $db->prepare("UPDATE Usuario SET Id_Rol=(SELECT Id_Rol FROM Rol WHERE Nombre_Rol='Administrador' LIMIT 1) WHERE Id_Usuario=?")->execute([$u['Id_Usuario']]);
     expect('admin write requires CSRF',request('api/admin/Equipos.php',[]),403);
+    expect('admin with CSRF reaches field validation',request('api/admin/Equipos.php',[],null,['X-CSRF-Token: '.$csrf]),400);
+    $current = expect('role changes applied without login', request('api/auth/me.php'),200);
+    if ($current['data']['role']['name'] !== 'Administrador') throw new RuntimeException('Stale role');
     $rollback=$d;$rollback['email']='rollback_'.$email;$rollback['carnet']='rollback_'.$stamp;$rollback['username']='rollback_'.$stamp;$rollback['password']='ValidPass123';
     try {(new Usuario(new FailingConnection()))->register($rollback);throw new RuntimeException('Expected insert failure');} catch (LogicException $e) {}
     $q=$db->prepare('SELECT COUNT(*) FROM Persona WHERE Correo_Persona=?');$q->execute([$rollback['email']]);if ($q->fetchColumn()!=0) throw new RuntimeException('Orphan'); echo "PASS rollback without orphan\n";
+    expect('second wrong password',request('api/auth/login.php',['csrf'=>$csrf,'email'=>$email,'password'=>'wrong']),401);
+    expect('third wrong password locks account',request('api/auth/login.php',['csrf'=>$csrf,'email'=>$email,'password'=>'wrong']),429);
+    expect('correct password cannot bypass lock',request('api/auth/login.php',['csrf'=>$csrf,'email'=>$email,'password'=>$d['password']]),429);
     $ch=curl_init($base.'api/auth/logout.php');curl_setopt_array($ch,[CURLOPT_RETURNTRANSFER=>true,CURLOPT_COOKIEFILE=>$cookie,CURLOPT_COOKIEJAR=>$cookie,CURLOPT_POST=>true,CURLOPT_POSTFIELDS=>http_build_query(['csrf'=>$csrf])]);$body=curl_exec($ch);$code=curl_getinfo($ch,CURLINFO_RESPONSE_CODE);curl_close($ch);expect('logout',[$code,$body],303);
     expect('API after logout',request('api/admin/Equipos.php'),401);expect('dashboard after logout',request('index.php'),302);
+    expect('identity after logout', request('api/auth/me.php'), 401);
     foreach (['Styles/login.css','Js/login.js','Images/logo.webp','fonts/dm-sans-400-latin.woff2'] as $asset) expect('asset '.$asset,request($asset),200);
 } finally {
     $q=$db->prepare('DELETE u FROM Usuario u JOIN Persona p ON p.Id_Persona=u.Id_Persona WHERE p.Correo_Persona IN (?,?)');$q->execute([$email,'rollback_'.$email]);
     $q=$db->prepare('DELETE FROM Persona WHERE Correo_Persona IN (?,?)');$q->execute([$email,'rollback_'.$email]);
+    if ($temporaryRole !== null) $db->prepare('DELETE FROM Rol WHERE Id_Rol=?')->execute([$temporaryRole]);
     unlink($cookie);
 }

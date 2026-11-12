@@ -1,0 +1,216 @@
+.equipo {
+    --equipo-fondo: var(--acceso-fondo-pagina);
+    --perfil-fondo: var(--acceso-fondo-formulario);
+    --perfil-acento: var(--acceso-fondo-boton);
+    --perfil-texto: var(--acceso-texto-principal);
+    --perfil-texto-suave: var(--acceso-texto-secundario);
+    --perfil-foto-fondo: var(--acceso-fondo-campo);
+    --perfil-borde: var(--acceso-borde-formulario);
+    --perfil-texto-boton: var(--acceso-texto-principal);
+    --perfil-radio: 20px;
+    --perfil-foto-tamano: 130px;
+    --perfil-tiempo: 0.3s;
+    --equipo-ancho: 960px;
+    box-sizing: border-box;
+    padding: 1rem 1.25rem 4rem;
+    background: var(--equipo-fondo);
+    color: var(--perfil-texto);
+    text-align: center;
+}
+
+.equipo *,
+.equipo *::before,
+.equipo *::after {
+    box-sizing: border-box;
+}
+
+.equipo-cabecera {
+    margin-bottom: 2rem;
+}
+
+.equipo-etiqueta {
+    margin: 0 0 0.5rem;
+    color: var(--perfil-texto-suave);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.equipo-cabecera h2 {
+    margin: 0;
+    font-size: 1.75rem;
+}
+
+.equipo-lista {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    gap: 1.5rem;
+    max-width: var(--equipo-ancho);
+    margin: 0 auto;
+}
+
+.perfil {
+    position: relative;
+    padding: 2rem 1.25rem 5.5rem;
+    overflow: hidden;
+    border: 1px solid var(--perfil-borde);
+    border-radius: var(--perfil-radio);
+    background: var(--perfil-fondo);
+}
+
+.perfil-foto {
+    position: relative;
+    isolation: isolate;
+    width: var(--perfil-foto-tamano);
+    height: var(--perfil-foto-tamano);
+    margin: 0 auto 2rem;
+}
+
+.perfil-foto::before {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 135%;
+    left: 0;
+    z-index: -1;
+    height: 0;
+    border-radius: 50%;
+    background: var(--perfil-acento);
+    transform: scale(3);
+    transition: height var(--perfil-tiempo) ease;
+}
+
+.perfil-foto::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: 50%;
+    background: var(--perfil-acento);
+}
+
+.perfil-iniciales,
+.perfil-foto img {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--perfil-foto-fondo);
+    color: var(--acceso-color-enlace);
+    font-size: 2.5rem;
+    font-weight: bold;
+    object-fit: cover;
+    transition:
+        transform var(--perfil-tiempo) ease,
+        box-shadow var(--perfil-tiempo) ease;
+}
+
+.perfil-nombre {
+    position: relative;
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+    overflow-wrap: anywhere;
+}
+
+.perfil-cargo {
+    position: relative;
+    margin: 0;
+    color: var(--perfil-texto-suave);
+    font-size: 0.9rem;
+}
+
+.perfil-enlaces {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: var(--perfil-acento);
+    transform: translateY(0.4rem);
+    transition: transform var(--perfil-tiempo) ease;
+}
+
+.perfil-boton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid currentColor;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--perfil-texto-boton);
+    font: inherit;
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+
+.perfil-boton:disabled {
+    cursor: default;
+}
+
+.perfil:not(.sin-efecto) .perfil-boton:not(:disabled):hover {
+    background: var(--acceso-fondo-boton-hover);
+    color: var(--perfil-texto-boton);
+    border-color: var(--acceso-color-foco);
+}
+
+.perfil-boton:focus-visible {
+    outline: 2px solid var(--perfil-texto-boton);
+    outline-offset: 3px;
+}
+
+.perfil:not(.sin-efecto):hover .perfil-foto::before,
+.perfil:not(.sin-efecto):has(.perfil-boton:focus-visible) .perfil-foto::before {
+    height: 100%;
+}
+
+.perfil:not(.sin-efecto):hover .perfil-iniciales,
+.perfil:not(.sin-efecto):hover .perfil-foto img,
+.perfil:not(.sin-efecto):has(.perfil-boton:focus-visible) .perfil-iniciales,
+.perfil:not(.sin-efecto):has(.perfil-boton:focus-visible) .perfil-foto img {
+    box-shadow: 0 0 0 14px var(--perfil-fondo);
+}
+
+.perfil:not(.sin-efecto):hover .perfil-enlaces,
+.perfil:not(.sin-efecto):has(.perfil-boton:focus-visible) .perfil-enlaces {
+    transform: translateY(0);
+}
+
+@media (max-width: 700px) {
+    .equipo-lista {
+        grid-template-columns: 1fr;
+        max-width: 340px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .perfil-foto::before,
+    .perfil-iniciales,
+    .perfil-foto img,
+    .perfil-enlaces {
+        transition: none;
+    }
+}
+
+.perfil,
+.perfil-enlaces {
+    min-width: 0;
+}
+
+@media (max-width: 600px) {
+    .equipo {
+        padding-right: 0.75rem;
+        padding-left: 0.75rem;
+    }
+
+    .perfil-boton {
+        min-height: 44px;
+    }
+}

@@ -1,81 +1,92 @@
-.disponible{
-    background-color: #B0FFB5;
+.buscador-inventario {
+    display: grid;
+    justify-items: start;
+    gap: 0.6rem;
+    margin: 1.5rem 0;
 }
-.dado-de-baja{
-    background-color: #FFB0B0;
-} 
-.en-reparacion{
-    background-color: #FFFAB0;
-}
-.prestado{
-    background-color: #B0D4FF;
-}
-#ModalEquipos{
-    box-sizing: border-box;
-    width: min(94vw, 56rem);
-    max-height: 90dvh;
-    margin: auto;
-    padding: 1.5rem;
-    overflow-y: auto;
 
-    border: 1px solid #d7dde5;
-    border-radius: 0.875rem;
-    background: #fff;
-    box-shadow: 0 16px 48px rgb(0 0 0 / 20%);
+.disponible {
+    --fondo-fila: var(--fondo-exito);
 }
+
+.dado-de-baja {
+    --fondo-fila: var(--fondo-error);
+}
+
+.en-reparacion {
+    --fondo-fila: var(--fondo-alerta);
+}
+
+.prestado {
+    --fondo-fila: var(--fondo-informacion);
+}
+
 .campo-en-linea {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 0.25rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
     max-width: 100%;
 }
 
 .campo-en-linea select,
 .campo-en-linea input {
+    flex: 1 1 12rem;
     min-width: 0;
 }
 
 .campo-descripcion {
     display: grid;
-    gap: 0.375rem;
-    margin: 1rem 0;
+    gap: 0.5rem;
 }
 
-.campo-descripcion textarea {
-    box-sizing: border-box;
-    width: 100%;
-    resize: vertical;
+.campo-codigo-equipo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-#ModalPreview h2 {
-  margin: 0 0 1rem;
+.campo-codigo-equipo input {
+    flex: 1;
+    min-width: 0;
 }
 
-#DetalleEquipo {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
+#prefijoCodigoEquipo {
+    font-weight: 700;
+    white-space: nowrap;
 }
 
-#DetalleEquipo > p {
-  margin: 0;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  background: #f1f5f9;
-  overflow-wrap: anywhere;
+#DetalleEquipo,
+#datosDetalleUsuario {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
 }
 
-#DetalleEquipo strong {
-  display: block;
-  margin-bottom: 0.25rem;
+#DetalleEquipo > p,
+#datosDetalleUsuario > p {
+    margin: 0;
+    padding: 1rem;
+    border: 1px solid var(--borde-suave);
+    border-radius: var(--radio-control);
+    background: var(--fondo-campo);
+    overflow-wrap: anywhere;
+}
+
+#DetalleEquipo strong,
+#datosDetalleUsuario strong {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: var(--color-acento);
 }
 
 #DetalleEquipo .detalle-completo {
-  grid-column: 1 / -1;
+    grid-column: 1 / -1;
 }
 
-@media (max-width: 36rem) {
-  #DetalleEquipo {
-    grid-template-columns: 1fr;
-  }
+@media (max-width: 600px) {
+    #DetalleEquipo,
+    #datosDetalleUsuario {
+        grid-template-columns: 1fr;
+    }
 }

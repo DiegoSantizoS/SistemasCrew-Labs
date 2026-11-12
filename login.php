@@ -1,56 +1,277 @@
 <?php
 require_once __DIR__ . '/api/helpers/auth.php';
 header('Cache-Control: no-store');
-if (auth_user()) { header('Location: ' . auth_url('index.php')); exit; }
+if (auth_current_user()) {
+  header('Location: ' . auth_url('index.php'));
+  exit;
+}
 ?>
 <!doctype html>
 <html lang="es">
+
 <head>
-  <meta charset="utf-8"><meta name="csrf-token" content="<?= htmlspecialchars(auth_token(), ENT_QUOTES, 'UTF-8') ?>">
+  <meta charset="utf-8">
+  <meta name="csrf-token" content="<?= htmlspecialchars(auth_token(), ENT_QUOTES, 'UTF-8') ?>">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="Images/sistemascrew.ico">
   <title>Acceso | SistemasCrew Labs</title>
-  
-  	<link rel="stylesheet" href="Styles/login.css">
+  <link rel="stylesheet" href="Styles/login.css?v=<?= filemtime(__DIR__ . '/Styles/login.css') ?>">
+  <link rel="stylesheet" href="Styles/equipo.css?v=<?= filemtime(__DIR__ . '/Styles/equipo.css') ?>">
 </head>
+
 <body>
-  <main class="cl-login10-demo">
-    <section class="cl-login10" aria-label="Cuenta de SistemasCrew Labs">
-      <header class="cl-login10__head">
-        <span class="cl-login10__logo" aria-hidden="true">
-          <img src="Images/logo.webp" width="40" height="40" alt="">
+  <main class="pagina-acceso">
+    <section class="acceso" aria-label="Cuenta de SistemasCrew Labs">
+      <header class="encabezado-acceso">
+        <span class="logo-acceso" aria-hidden="true">
+          <img src="Images/logo.webp" width="80" height="80" alt="">
         </span>
-        <p class="cl-login10__brand">SistemasCrew Labs</p>
-        <p class="cl-login10__tagline">Gestiona tus equipos de laboratorio.</p>
+        <p class="nombre-sistema">SistemasCrew Labs</p>
+        <p class="descripcion-sistema">Gestiona tus equipos de laboratorio.</p>
       </header>
-
-      <div class="cl-login10__tabs" role="tablist" aria-label="Iniciar sesión o crear cuenta" data-tablist>
-        <span class="cl-login10__thumb" aria-hidden="true"></span>
-        <button class="cl-login10__tab" type="button" role="tab" id="cl-login10-tab-login" aria-controls="cl-login10-panel-login" aria-selected="true">Iniciar sesión</button>
-        <button class="cl-login10__tab" type="button" role="tab" id="cl-login10-tab-signup" aria-controls="cl-login10-panel-signup" aria-selected="false" tabindex="-1">Crear cuenta</button>
+      <div class="pestanas-formularios" role="tablist" aria-label="Iniciar sesión o crear cuenta" data-lista-pestanas>
+        <span class="indicador-pestana" aria-hidden="true"></span>
+        <button class="pestana-formulario" type="button" role="tab" id="pestana-ingreso" aria-controls="panel-ingreso" aria-selected="true">Iniciar sesión</button>
+        <button class="pestana-formulario" type="button" role="tab" id="pestana-registro" aria-controls="panel-registro" aria-selected="false" tabindex="-1">Crear cuenta</button>
       </div>
-
-      <div class="cl-login10__panels">
-        <div class="cl-login10__panel" role="tabpanel" id="cl-login10-panel-login" aria-labelledby="cl-login10-tab-login" tabindex="0">
-          <form class="cl-login10__form" data-form="login" novalidate><h1 class="cl-login10__title">Bienvenido de nuevo</h1><p class="cl-login10__error" role="status" aria-live="polite" data-server></p><div class="cl-login10__field" data-field><label class="cl-login10__label" for="field-login-email">Correo electrónico</label><input class="cl-login10__input" id="field-login-email" name="email" type="email" autocomplete="username" maxlength="150" required aria-describedby="field-login-email-err"><p class="cl-login10__error" id="field-login-email-err" data-error></p></div><div class="cl-login10__field" data-field><label class="cl-login10__label" for="field-login-password">Contraseña</label><div class="cl-login10__pw"><input class="cl-login10__input" id="field-login-password" name="password" type="password" autocomplete="current-password" maxlength="4096" required aria-describedby="field-login-password-err"><button class="cl-login10__eye" type="button" aria-label="Mostrar contraseña" aria-pressed="false" aria-controls="field-login-password" data-pw-toggle>
-                  <svg class="cl-login10__eye-on" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
-                  <svg class="cl-login10__eye-off" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18M10.6 5.1A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.1M6.6 6.6C3.9 8.3 2 12 2 12s3.6 7 10 7a9.8 9.8 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
-                </button></div><p class="cl-login10__error" id="field-login-password-err" data-error></p></div><button class="cl-login10__submit" type="submit">Iniciar sesión</button><p class="cl-login10__swap">¿Aún no tienes cuenta? <button class="cl-login10__swap-btn" type="button" data-go="signup">Crear una cuenta</button></p></form>
+      <div class="paneles-formularios">
+        <div class="panel-formulario" role="tabpanel" id="panel-ingreso" aria-labelledby="pestana-ingreso" tabindex="0">
+          <form class="formulario-cuenta" data-formulario="login" novalidate>
+            <h1 class="titulo-formulario">Bienvenido de nuevo</h1>
+            <p class="mensaje-error" role="status" aria-live="polite" data-mensaje-servidor></p>
+            <div class="campo-formulario" data-campo>
+              <label class="etiqueta-campo" for="ingreso-correo">Correo electrónico</label>
+              <input
+                class="entrada-campo"
+                id="ingreso-correo"
+                name="email"
+                type="email"
+                autocomplete="username"
+                maxlength="150"
+                required
+                aria-describedby="error-ingreso-correo">
+              <p class="mensaje-error" id="error-ingreso-correo" data-error-campo></p>
+            </div>
+            <div class="campo-formulario" data-campo>
+              <label class="etiqueta-campo" for="ingreso-contrasena">Contraseña</label>
+              <div class="grupo-contrasena">
+                <input
+                  class="entrada-campo"
+                  id="ingreso-contrasena"
+                  name="password"
+                  type="password"
+                  autocomplete="current-password"
+                  maxlength="4096"
+                  required
+                  aria-describedby="error-ingreso-contrasena">
+                <button class="boton-contrasena" type="button" aria-label="Mostrar contraseña" aria-pressed="false" aria-controls="ingreso-contrasena" data-alternar-contrasena>
+                  <svg class="icono-ojo-abierto" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  <svg class="icono-ojo-cerrado" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 3l18 18M10.6 5.1A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.1M6.6 6.6C3.9 8.3 2 12 2 12s3.6 7 10 7a9.8 9.8 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+                  </svg>
+                </button>
+              </div>
+              <p class="mensaje-error" id="error-ingreso-contrasena" data-error-campo></p>
+            </div>
+            <button class="boton-enviar" type="submit">Iniciar sesión</button>
+            <p class="texto-cambiar-formulario">
+              ¿Aún no tienes cuenta?
+              <button class="boton-cambiar-formulario" type="button" data-destino-formulario="signup">Crear una cuenta</button>
+            </p>
+          </form>
         </div>
-
-        <div class="cl-login10__panel" role="tabpanel" id="cl-login10-panel-signup" aria-labelledby="cl-login10-tab-signup" tabindex="0" hidden>
-          <form class="cl-login10__form" data-form="signup" novalidate><h2 class="cl-login10__title">Crea tu cuenta</h2><p class="cl-login10__error" role="status" aria-live="polite" data-server></p><div class="cl-login10__field" data-field><label class="cl-login10__label" for="field-signup-nombres">Nombres</label><input class="cl-login10__input" id="field-signup-nombres" name="nombres" type="text" autocomplete="given-name" maxlength="100" required aria-describedby="field-signup-nombres-err"><p class="cl-login10__error" id="field-signup-nombres-err" data-error></p></div><div class="cl-login10__field" data-field><label class="cl-login10__label" for="field-signup-apellidos">Apellidos</label><input class="cl-login10__input" id="field-signup-apellidos" name="apellidos" type="text" autocomplete="family-name" maxlength="100" required aria-describedby="field-signup-apellidos-err"><p class="cl-login10__error" id="field-signup-apellidos-err" data-error></p></div><div class="cl-login10__field" data-field><label class="cl-login10__label" for="field-signup-carnet">Carnet</label><input class="cl-login10__input" id="field-signup-carnet" name="carnet" type="text" autocomplete="off" maxlength="50" required aria-describedby="field-signup-carnet-err"><p class="cl-login10__error" id="field-signup-carnet-err" data-error></p></div><div class="cl-login10__field" data-field><label class="cl-login10__label" for="field-signup-username">Nombre de usuario</label><input class="cl-login10__input" id="field-signup-username" name="username" type="text" autocomplete="username" maxlength="50" required aria-describedby="field-signup-username-err"><p class="cl-login10__error" id="field-signup-username-err" data-error></p></div><div class="cl-login10__field" data-field><label class="cl-login10__label" for="field-signup-email">Correo electrónico</label><input class="cl-login10__input" id="field-signup-email" name="email" type="email" autocomplete="email" maxlength="150" required aria-describedby="field-signup-email-err"><p class="cl-login10__error" id="field-signup-email-err" data-error></p></div><div class="cl-login10__field" data-field><label class="cl-login10__label" for="field-signup-telefono">Teléfono (opcional)</label><input class="cl-login10__input" id="field-signup-telefono" name="telefono" type="tel" autocomplete="tel" maxlength="20"  aria-describedby="field-signup-telefono-err"><p class="cl-login10__error" id="field-signup-telefono-err" data-error></p></div><div class="cl-login10__field" data-field><label class="cl-login10__label" for="field-signup-password">Contraseña</label><div class="cl-login10__pw"><input class="cl-login10__input" id="field-signup-password" name="password" type="password" autocomplete="new-password" maxlength="72" required aria-describedby="field-signup-password-err"><button class="cl-login10__eye" type="button" aria-label="Mostrar contraseña" aria-pressed="false" aria-controls="field-signup-password" data-pw-toggle>
-                  <svg class="cl-login10__eye-on" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
-                  <svg class="cl-login10__eye-off" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18M10.6 5.1A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.1M6.6 6.6C3.9 8.3 2 12 2 12s3.6 7 10 7a9.8 9.8 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
-                </button></div><p class="cl-login10__error" id="field-signup-password-err" data-error></p></div><div class="cl-login10__field" data-field><label class="cl-login10__label" for="field-signup-confirm">Confirmar contraseña</label><div class="cl-login10__pw"><input class="cl-login10__input" id="field-signup-confirm" name="confirm" type="password" autocomplete="new-password" maxlength="72" required aria-describedby="field-signup-confirm-err"><button class="cl-login10__eye" type="button" aria-label="Mostrar contraseña" aria-pressed="false" aria-controls="field-signup-confirm" data-pw-toggle>
-                  <svg class="cl-login10__eye-on" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
-                  <svg class="cl-login10__eye-off" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18M10.6 5.1A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.1M6.6 6.6C3.9 8.3 2 12 2 12s3.6 7 10 7a9.8 9.8 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
-                </button></div><p class="cl-login10__error" id="field-signup-confirm-err" data-error></p></div><p class="cl-login10__hint">Al menos 8 caracteres y máximo 72 bytes.</p><button class="cl-login10__submit" type="submit">Crear cuenta</button><p class="cl-login10__swap">¿Ya tienes cuenta? <button class="cl-login10__swap-btn" type="button" data-go="login">Iniciar sesión</button></p></form>
+        <div class="panel-formulario" role="tabpanel" id="panel-registro" aria-labelledby="pestana-registro" tabindex="0" hidden>
+          <form class="formulario-cuenta" data-formulario="signup" novalidate>
+            <h2 class="titulo-formulario">Crea tu cuenta</h2>
+            <p class="mensaje-error" role="status" aria-live="polite" data-mensaje-servidor></p>
+            <div class="campo-formulario" data-campo>
+              <label class="etiqueta-campo" for="registro-nombres">Nombres</label>
+              <input
+                class="entrada-campo"
+                id="registro-nombres"
+                name="nombres"
+                type="text"
+                autocomplete="given-name"
+                maxlength="100"
+                required
+                aria-describedby="error-registro-nombres">
+              <p class="mensaje-error" id="error-registro-nombres" data-error-campo></p>
+            </div>
+            <div class="campo-formulario" data-campo>
+              <label class="etiqueta-campo" for="registro-apellidos">Apellidos</label>
+              <input
+                class="entrada-campo"
+                id="registro-apellidos"
+                name="apellidos"
+                type="text"
+                autocomplete="family-name"
+                maxlength="100"
+                required
+                aria-describedby="error-registro-apellidos">
+              <p class="mensaje-error" id="error-registro-apellidos" data-error-campo></p>
+            </div>
+            <div class="campo-formulario" data-campo>
+              <label class="etiqueta-campo" for="registro-carnet">Carnet</label>
+              <input
+                class="entrada-campo"
+                id="registro-carnet"
+                name="carnet"
+                type="text"
+                autocomplete="off"
+                maxlength="50"
+                required
+                aria-describedby="error-registro-carnet">
+              <p class="mensaje-error" id="error-registro-carnet" data-error-campo></p>
+            </div>
+            <div class="campo-formulario" data-campo>
+              <label class="etiqueta-campo" for="registro-usuario">Nombre de usuario</label>
+              <input
+                class="entrada-campo"
+                id="registro-usuario"
+                name="username"
+                type="text"
+                autocomplete="username"
+                maxlength="50"
+                required
+                aria-describedby="error-registro-usuario">
+              <p class="mensaje-error" id="error-registro-usuario" data-error-campo></p>
+            </div>
+            <div class="campo-formulario" data-campo>
+              <label class="etiqueta-campo" for="registro-correo">Correo electrónico</label>
+              <input
+                class="entrada-campo"
+                id="registro-correo"
+                name="email"
+                type="email"
+                autocomplete="email"
+                maxlength="150"
+                required
+                aria-describedby="error-registro-correo">
+              <p class="mensaje-error" id="error-registro-correo" data-error-campo></p>
+            </div>
+            <div class="campo-formulario" data-campo>
+              <label class="etiqueta-campo" for="registro-telefono">Teléfono (opcional)</label>
+              <input
+                class="entrada-campo"
+                id="registro-telefono"
+                name="telefono"
+                type="tel"
+                autocomplete="tel"
+                maxlength="20"
+                aria-describedby="error-registro-telefono">
+              <p class="mensaje-error" id="error-registro-telefono" data-error-campo></p>
+            </div>
+            <div class="campo-formulario" data-campo>
+              <label class="etiqueta-campo" for="registro-contrasena">Contraseña</label>
+              <div class="grupo-contrasena">
+                <input
+                  class="entrada-campo"
+                  id="registro-contrasena"
+                  name="password"
+                  type="password"
+                  autocomplete="new-password"
+                  maxlength="72"
+                  required
+                  aria-describedby="error-registro-contrasena">
+                <button class="boton-contrasena" type="button" aria-label="Mostrar contraseña" aria-pressed="false" aria-controls="registro-contrasena" data-alternar-contrasena>
+                  <svg class="icono-ojo-abierto" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  <svg class="icono-ojo-cerrado" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 3l18 18M10.6 5.1A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.1M6.6 6.6C3.9 8.3 2 12 2 12s3.6 7 10 7a9.8 9.8 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+                  </svg>
+                </button>
+              </div>
+              <p class="mensaje-error" id="error-registro-contrasena" data-error-campo></p>
+            </div>
+            <div class="campo-formulario" data-campo>
+              <label class="etiqueta-campo" for="registro-confirmar-contrasena">Confirmar contraseña</label>
+              <div class="grupo-contrasena">
+                <input
+                  class="entrada-campo"
+                  id="registro-confirmar-contrasena"
+                  name="confirm"
+                  type="password"
+                  autocomplete="new-password"
+                  maxlength="72"
+                  required
+                  aria-describedby="error-registro-confirmar-contrasena">
+                <button class="boton-contrasena" type="button" aria-label="Mostrar contraseña" aria-pressed="false" aria-controls="registro-confirmar-contrasena" data-alternar-contrasena>
+                  <svg class="icono-ojo-abierto" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  <svg class="icono-ojo-cerrado" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 3l18 18M10.6 5.1A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.1M6.6 6.6C3.9 8.3 2 12 2 12s3.6 7 10 7a9.8 9.8 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+                  </svg>
+                </button>
+              </div>
+              <p class="mensaje-error" id="error-registro-confirmar-contrasena" data-error-campo></p>
+            </div>
+            <p class="ayuda-contrasena">Al menos 8 caracteres y máximo 72 bytes.</p>
+            <button class="boton-enviar" type="submit">Crear cuenta</button>
+            <p class="texto-cambiar-formulario">
+              ¿Ya tienes cuenta?
+              <button class="boton-cambiar-formulario" type="button" data-destino-formulario="login">Iniciar sesión</button>
+            </p>
+          </form>
         </div>
       </div>
-
-      <div class="cl-login10__vh" role="status" aria-live="polite" data-live></div>
+      <div class="aviso-accesible" role="status" aria-live="polite" data-aviso-accesible></div>
     </section>
   </main>
-	<script src="Js/login.js"></script>
+  <section class="equipo" aria-labelledby="tituloEquipo">
+    <header class="equipo-cabecera">
+      <p class="equipo-etiqueta">SistemasCrew Labs</p>
+      <h2 id="tituloEquipo">Nuestro equipo</h2>
+    </header>
+    <div class="equipo-lista">
+      <article class="perfil">
+        <div class="perfil-foto">
+          <img src="Images/Programadores/Carlos.jpeg" alt="Carlos Andres Arriaza Lara" width="130" height="130" loading="lazy">
+        </div>
+        <h3 class="perfil-nombre">Carlos Andres Arriaza Lara</h3>
+        <p class="perfil-cargo">0901-23-13862</p>
+        <p class="perfil-cargo">Desarrollo de software</p>
+        <div class="perfil-enlaces" aria-label="Enlaces de Carlos Andres Arriaza Lara">
+          <a class="perfil-boton" href="https://github.com/RadeonHeartz" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a class="perfil-boton" href="https://radeonheartz.github.io/CarlosAndres.github.io/" target="_blank" rel="noopener noreferrer">Portafolio</a>
+        </div>
+      </article>
+      <article class="perfil">
+        <div class="perfil-foto">
+          <img src="Images/Programadores/Miguel.jpg" alt="Miguel David Contreras Jacinto" width="130" height="130" loading="lazy">
+        </div>
+        <h3 class="perfil-nombre">Miguel David Contreras Jacinto</h3>
+        <p class="perfil-cargo">0901-21-3878</p>
+        <p class="perfil-cargo">Desarrollo de software</p>
+        <div class="perfil-enlaces" aria-label="Enlaces de Miguel David Contreras Jacinto">
+          <a class="perfil-boton" href="https://github.com/miguelcont264" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a class="perfil-boton" href="https://miguelcont264.github.io" target="_blank" rel="noopener noreferrer">Portafolio</a>
+        </div>
+      </article>
+      <article class="perfil">
+        <div class="perfil-foto">
+          <img src="Images/Programadores/Diego.jpeg" alt="Diego Fernando Santizo Samayoa" width="130" height="130" loading="lazy">
+        </div>
+        <h3 class="perfil-nombre">Diego Fernando Santizo Samayoa</h3>
+        <p class="perfil-cargo">0901-22-15950</p>
+        <p class="perfil-cargo">Desarrollo de software</p>
+        <div class="perfil-enlaces" aria-label="Enlaces de Diego Fernando Santizo Samayoa">
+          <a class="perfil-boton" href="https://github.com/DiegoSantizoS" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a class="perfil-boton" href="https://diegosantizos.github.io/" target="_blank" rel="noopener noreferrer">Portafolio</a>
+        </div>
+      </article>
+    </div>
+  </section>
+  <script src="Js/login.js?v=<?= filemtime(__DIR__ . '/Js/login.js') ?>">
+  </script>
+  <script src="Js/equipo.js?v=<?= filemtime(__DIR__ . '/Js/equipo.js') ?>">
+  </script>
 </body>
+
 </html>
