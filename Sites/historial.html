@@ -1,23 +1,30 @@
-<main>
+<div id="historialContainer">
   <h1 id="tituloHistorial">Mis préstamos</h1>
-  <p id="avisoHistorial" role="status"></p>
+  <form id="filtroHistorial" class="buscador-inventario">
+    <label for="buscarHistorial">Buscar en el historial</label>
+    <input type="search" id="buscarHistorial" maxlength="100" placeholder="Referencia, usuario, estado o motivo" aria-controls="historialTable">
+    <button type="submit">Buscar</button>
+    <p id="avisoHistorial" role="status" aria-live="polite"></p>
+  </form>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Referencia</th>
-        <th id="columnaUsuarioHistorial" hidden>Usuario</th>
-        <th>Fecha</th>
-        <th>Vencimiento</th>
-        <th>Estado</th>
-        <th>Motivo</th>
-      </tr>
-    </thead>
-    <tbody id="filasHistorial"></tbody>
-  </table>
+  <div class="tabla-desplazable" role="region" aria-label="Historial de prestamos" tabindex="0">
+      <table id="historialTable">
+        <thead>
+          <tr>
+            <th>Referencia</th>
+            <th id="columnaUsuarioHistorial" hidden>Usuario</th>
+            <th>Fecha</th>
+            <th>Vencimiento</th>
+            <th>Estado</th>
+            <th>Motivo</th>
+          </tr>
+        </thead>
+        <tbody id="filasHistorial"></tbody>
+      </table>
+  </div>
   <nav aria-label="Paginación del historial">
     <button type="button" id="historialAnterior" disabled>Anterior</button>
     <span id="paginaHistorial" aria-live="polite"></span>
     <button type="button" id="historialSiguiente" disabled>Siguiente</button>
   </nav>
-</main>
+</div>

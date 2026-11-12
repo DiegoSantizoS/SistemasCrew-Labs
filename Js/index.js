@@ -1,4 +1,3 @@
-// Navegación y elementos compartidos del panel.
 const PerfilImg = document.getElementById("PerfilImg");
 const PerfilNav = document.getElementById("PerfilNav");
 PerfilImg.addEventListener("click", () => PerfilNav.classList.toggle("mostrar"));
