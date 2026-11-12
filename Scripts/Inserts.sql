@@ -82,6 +82,7 @@ WHERE NOT EXISTS (
 ORDER BY m.Id_Modulo, a.Id_Accion;
 
 -- Administrador: todos los permisos, incluyendo Devoluciones.
+
 INSERT INTO Rol_Permiso (Id_Rol, Id_Permiso)
 SELECT r.Id_Rol, p.Id_Permiso
 FROM Rol r
@@ -102,20 +103,13 @@ JOIN Accion a ON a.Id_Accion = p.Id_Accion
 WHERE r.Nombre_Rol = 'Encargado'
   AND (   (m.Nombre_Modulo = 'Equipos' AND a.Nombre_Accion IN ('Crear','Leer','Actualizar'))
        OR (m.Nombre_Modulo = 'Prestamos' AND a.Nombre_Accion IN ('Crear','Leer','Actualizar','Autorizar'))
+       OR (m.Nombre_Modulo = 'Devoluciones' AND a.Nombre_Accion = 'Leer')
        OR (m.Nombre_Modulo IN ('Usuarios','Reportes') AND a.Nombre_Accion = 'Leer'))
   AND NOT EXISTS (
       SELECT 1 FROM Rol_Permiso rp
       WHERE rp.Id_Rol = r.Id_Rol AND rp.Id_Permiso = p.Id_Permiso
   );
 
--- Retira el acceso a inventario que pudo asignar el script inicial.
-DELETE rp
-FROM Rol_Permiso rp
-JOIN Rol r ON r.Id_Rol = rp.Id_Rol
-JOIN Permiso p ON p.Id_Permiso = rp.Id_Permiso
-JOIN Modulo m ON m.Id_Modulo = p.Id_Modulo
-WHERE r.Nombre_Rol = 'Usuario'
-  AND m.Nombre_Modulo = 'Equipos';
 
 -- Usuario: solicita y consulta prestamos, sin acceso a inventario.
 INSERT INTO Rol_Permiso (Id_Rol, Id_Permiso)
@@ -125,8 +119,8 @@ CROSS JOIN Permiso p
 JOIN Modulo m ON m.Id_Modulo = p.Id_Modulo
 JOIN Accion a ON a.Id_Accion = p.Id_Accion
 WHERE r.Nombre_Rol = 'Usuario'
-  AND m.Nombre_Modulo = 'Prestamos'
-  AND a.Nombre_Accion IN ('Crear','Leer')
+  AND ((m.Nombre_Modulo = 'Prestamos' AND a.Nombre_Accion IN ('Crear','Leer'))
+       OR (m.Nombre_Modulo = 'Devoluciones' AND a.Nombre_Accion = 'Leer'))
   AND NOT EXISTS (
       SELECT 1 FROM Rol_Permiso rp
       WHERE rp.Id_Rol = r.Id_Rol AND rp.Id_Permiso = p.Id_Permiso

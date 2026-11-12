@@ -1,12 +1,12 @@
 <section class="prestamos-page">
     <h1>Equipos disponibles</h1>
-    <p class="intro">Selecciona un equipo para enviar una solicitud de préstamo.</p>
+    <p class="intro">Selecciona un equipo disponible. Al confirmar, el préstamo se registra de inmediato y el equipo cambia a Prestado.</p>
     <label class="busqueda-equipos" for="buscarEquipo">Buscar equipo por nombre</label>
     <input id="buscarEquipo" type="search" placeholder="Ejemplo: microscopio" autocomplete="off" />
     <p id="avisoPrestamos" role="status" aria-live="polite"></p>
     <section id="equiposDisponibles" aria-label="Lista de equipos disponibles"></section>
   <dialog id="modalPrestamo" aria-labelledby="tituloFormulario">
-    <h2 id="tituloFormulario">Solicitar préstamo</h2>
+    <h2 id="tituloFormulario">Registrar préstamo</h2>
     <p id="equipoSeleccionado"></p>
     <form id="formPrestamo">
       <input type="hidden" name="equipo_id" />
@@ -21,7 +21,7 @@
       <label for="motivoPrestamo">Motivo del préstamo</label>
       <textarea id="motivoPrestamo" name="motivo" rows="4" maxlength="500" placeholder="Describe para qué necesitas el equipo"></textarea>
       <div class="acciones">
-        <button type="submit">Enviar solicitud</button>
+        <button type="submit">Registrar préstamo</button>
         <button type="button" id="cerrarPrestamo">Cancelar</button>
       </div>
     </form>

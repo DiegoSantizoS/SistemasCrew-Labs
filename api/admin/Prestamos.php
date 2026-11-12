@@ -88,5 +88,5 @@ try {
 } catch (Throwable $e) {
     if ($db->inTransaction()) $db->rollBack();
     error_log('Error Prestamos.php POST: ' . $e->getMessage());
-    Response::error('No se pudo registrar la solicitud de préstamo.', -500, 500);
+    Response::error('No se pudo registrar el préstamo.', -500, 500);
 }
