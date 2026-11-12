@@ -89,6 +89,10 @@ switch ($method) {
         try {
             $equipo = new Equipo($conection, $response);
             $equipo->update($_PUT);
+        } catch (DomainException $th) {
+            $response->error($th->getMessage(), 2003, 409);
+        } catch (OutOfBoundsException $th) {
+            $response->error($th->getMessage(), 2005, 404);
         } catch (\Throwable $th) {
             $response->error("Error al actualizar el equipo", 2003, 400);
         }
@@ -106,6 +110,10 @@ switch ($method) {
             $equipo->delete([
                 'Codigo' => $Codigo
             ]);
+        } catch (DomainException $th) {
+            $response->error($th->getMessage(), 2004, 409);
+        } catch (OutOfBoundsException $th) {
+            $response->error($th->getMessage(), 2005, 404);
         } catch (\Throwable $th) {
             $response->error("Error al eliminar el equipo", 2004, 400);
         }

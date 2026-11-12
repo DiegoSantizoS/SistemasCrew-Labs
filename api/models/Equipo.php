@@ -41,7 +41,7 @@ class Equipo
         /*$statement2 = $this->connection->prepare($registers);
         $statement2->execute();
         $result2 = $statement2->fetchAll(PDO::FETCH_ASSOC);*/
-      
+
     }
     function getAll($codigo){
           $query = "SELECT * FROM vwEquipo where codigo = :codigo";
@@ -59,7 +59,7 @@ class Equipo
             return;
         }
         $this->response->success("Detalle de equipo obtenido correctamente", $result, 1);
-        
+
     }
 
     //Función para añadir un nuevo equipo
@@ -93,9 +93,9 @@ class Equipo
         $Descripcion = $arrayData['descripcion'];
         $Imagen = $arrayData['imagen'] ?? null;
 
-        $query = "INSERT INTO Equipo (Codigo_Equipo, Id_Categoria, Id_Ubicacion, 
-        Id_Estado_Equipo, Marca_Equipo, Modelo_Equipo, Serie_Equipo, Descripcion_Equipo, 
-        Imagen_Equipo) 
+        $query = "INSERT INTO Equipo (Codigo_Equipo, Id_Categoria, Id_Ubicacion,
+        Id_Estado_Equipo, Marca_Equipo, Modelo_Equipo, Serie_Equipo, Descripcion_Equipo,
+        Imagen_Equipo)
         VALUES (:codigo, :categoria, :ubicacion, :estado, :marca, :modelo, :serie, :descripcion, :imagen)";
         $Statement = $this->connection->prepare($query);
         $Statement->execute([
@@ -115,63 +115,101 @@ class Equipo
     //Función para actualizar un equipo
     function update($arrayData)
     {
-        $Id_Equipo = $arrayData['id_equipo'];
-        $Codigo = $arrayData['codigo'];
-        $Categoria = $arrayData['categoria'];
-        $Ubicacion = $arrayData['ubicacion'];
-        $Estado = $arrayData['estado'];
-        $Marca = $arrayData['marca'] ?? null;
-        $Modelo = $arrayData['modelo'] ?? null;
-        $Serie = $arrayData['serie'] ?? null;
-        $Descripcion = $arrayData['descripcion'];
-        $Imagen = $arrayData['imagen'] ?? null;
+        $this->connection->beginTransaction();
+        try {
+            $this->bloquearEquipoEditable('Id_Equipo', $arrayData['id_equipo']);
+            $estadoConsulta = $this->connection->prepare('SELECT Nombre_Estado_Equipo FROM Estado_Equipo WHERE id_estado_Equipo = ?');
+            $estadoConsulta->execute([$arrayData['estado']]);
+            $nombreEstado = $estadoConsulta->fetchColumn();
+            if ($nombreEstado === false) throw new DomainException('Selecciona un estado de equipo existente.');
+            if ($nombreEstado === 'Prestado') throw new DomainException('El estado Prestado solo se asigna al registrar un prestamo.');
+            $Id_Equipo = $arrayData['id_equipo'];
+            $Codigo = $arrayData['codigo'];
+            $Categoria = $arrayData['categoria'];
+            $Ubicacion = $arrayData['ubicacion'];
+            $Estado = $arrayData['estado'];
+            $Marca = $arrayData['marca'] ?? null;
+            $Modelo = $arrayData['modelo'] ?? null;
+            $Serie = $arrayData['serie'] ?? null;
+            $Descripcion = $arrayData['descripcion'];
+            $Imagen = $arrayData['imagen'] ?? null;
 
-        $query = "UPDATE Equipo SET Codigo_Equipo=:codigo, Id_Categoria=:categoria, Id_Ubicacion=:ubicacion, 
-        Id_Estado_Equipo=:estado, Marca_Equipo=:marca, Modelo_Equipo=:modelo, Serie_Equipo=:serie, Descripcion_Equipo=:descripcion, 
-        Imagen_Equipo=:imagen WHERE Id_Equipo=:id_equipo";
-        $Statement = $this->connection->prepare($query);
-        $Statement->execute([
-            'id_equipo' => $Id_Equipo,
-            'codigo' => $Codigo,
-            'categoria' => $Categoria,
-            'ubicacion' => $Ubicacion,
-            'estado' => $Estado,
-            'marca' => $Marca,
-            'modelo' => $Modelo,
-            'serie' => $Serie,
-            'descripcion' => $Descripcion,
-            'imagen' => $Imagen
-        ]);
-        if ($Statement->rowCount() > 0) {
-            $this->response->success("Equipo actualizado correctamente", [], 1);
-        } else {
-            throw new Exception("No se pudo actualizar el equipo");
+            $query = "UPDATE Equipo SET Codigo_Equipo=:codigo, Id_Categoria=:categoria, Id_Ubicacion=:ubicacion,
+            Id_Estado_Equipo=:estado, Marca_Equipo=:marca, Modelo_Equipo=:modelo, Serie_Equipo=:serie, Descripcion_Equipo=:descripcion,
+            Imagen_Equipo=:imagen WHERE Id_Equipo=:id_equipo";
+            $Statement = $this->connection->prepare($query);
+            $Statement->execute([
+                'id_equipo' => $Id_Equipo,
+                'codigo' => $Codigo,
+                'categoria' => $Categoria,
+                'ubicacion' => $Ubicacion,
+                'estado' => $Estado,
+                'marca' => $Marca,
+                'modelo' => $Modelo,
+                'serie' => $Serie,
+                'descripcion' => $Descripcion,
+                'imagen' => $Imagen
+            ]);
+            $this->connection->commit();
+        } catch (\Throwable $error) {
+            if ($this->connection->inTransaction()) $this->connection->rollBack();
+            throw $error;
         }
+        $this->response->success("Equipo actualizado correctamente", [], 1);
     }
 
     //Función para hacer soft delete de un equipo, cambiando su estado a 4 (eliminado)
     function delete($arrayData)
     {
-        $Codigo_Equipo = $arrayData['Codigo'];
+        $this->connection->beginTransaction();
+        try {
+            $this->bloquearEquipoEditable('Codigo_Equipo', $arrayData['Codigo']);
+            $Codigo_Equipo = $arrayData['Codigo'];
 
-        $query = "UPDATE Equipo 
-              SET Id_Estado_Equipo = 4
-              WHERE Codigo_Equipo = :Codigo_Equipo";
+            $query = "UPDATE Equipo
+                  SET Id_Estado_Equipo = 4
+                  WHERE Codigo_Equipo = :Codigo_Equipo";
 
-        $Statement = $this->connection->prepare($query);
+            $Statement = $this->connection->prepare($query);
 
-        $Statement->execute([
-            'Codigo_Equipo' => $Codigo_Equipo
-        ]);
+            $Statement->execute([
+                'Codigo_Equipo' => $Codigo_Equipo
+            ]);
 
-        if ($Statement->rowCount() > 0) {
+            $this->connection->commit();
+        } catch (\Throwable $error) {
+            if ($this->connection->inTransaction()) $this->connection->rollBack();
+            throw $error;
+        }
             $this->response->success(
                 "Equipo eliminado correctamente",
                 [],
                 1
             );
-        } else {
-            throw new Exception("No se pudo eliminar el equipo");
+    }
+
+    // El bloqueo se conserva hasta confirmar la edicion o baja del equipo.
+    private function bloquearEquipoEditable(string $campo, $valor): void
+    {
+        if (!in_array($campo, ['Id_Equipo', 'Codigo_Equipo'], true)) {
+            throw new InvalidArgumentException('Campo de equipo no valido.');
+        }
+        $consulta = $this->connection->prepare("SELECT Id_Equipo FROM Equipo WHERE $campo = ? FOR UPDATE");
+        $consulta->execute([$valor]);
+        $id = $consulta->fetchColumn();
+        if ($id === false) throw new OutOfBoundsException('Equipo no encontrado.');
+
+        // Lectura actual con bloqueo: incluye solicitudes pendientes y prestamos vencidos.
+        $consulta = $this->connection->prepare("SELECT d.Id_Detalle
+            FROM Detalle_Prestamo d
+            JOIN Prestamo p ON p.Id_Prestamo = d.Id_Prestamo
+            JOIN Estado_Prestamo ep ON ep.id_estado_prestamo = p.id_estado_prestamo
+            WHERE d.Id_Equipo = ? AND d.Fecha_Devolucion IS NULL
+              AND ep.nombre_estado IN ('Pendiente', 'Activo', 'Vencido')
+            LIMIT 1 FOR UPDATE");
+        $consulta->execute([$id]);
+        if ($consulta->fetchColumn() !== false) {
+            throw new DomainException('No puedes editar ni dar de baja este equipo porque tiene un prestamo pendiente de devolucion. Resuelve el prestamo primero.');
         }
     }
 

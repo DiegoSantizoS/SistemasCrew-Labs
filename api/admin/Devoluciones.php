@@ -4,7 +4,7 @@ require_once __DIR__ . '/../core/Connection.php';
 require_once __DIR__ . '/../core/Response.php';
 require_once __DIR__ . '/../helpers/helpers.php';
 
-$user = requirePermission('Prestamos');
+$user = requirePermission('Devoluciones');
 $db = new Connection();
 $method = $_SERVER['REQUEST_METHOD'];
 $esAdmin = $user['role']['name'] === 'Administrador';
