@@ -44,7 +44,7 @@
 
 .equipo-lista {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
     gap: 1.5rem;
     max-width: var(--equipo-ancho);
     margin: 0 auto;
@@ -196,5 +196,21 @@
     .perfil-foto img,
     .perfil-enlaces {
         transition: none;
+    }
+}
+
+.perfil,
+.perfil-enlaces {
+    min-width: 0;
+}
+
+@media (max-width: 600px) {
+    .equipo {
+        padding-right: 0.75rem;
+        padding-left: 0.75rem;
+    }
+
+    .perfil-boton {
+        min-height: 44px;
     }
 }

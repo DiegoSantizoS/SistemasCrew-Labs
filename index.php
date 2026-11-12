@@ -149,6 +149,7 @@ $tituloHistorial = $esEstudiante ? 'Mi historial' : 'Historial';
     <script src="Js/usuarios.js?v=<?= filemtime(__DIR__ . '/Js/usuarios.js') ?>"></script>
     <script src="Js/index.js?v=<?= filemtime(__DIR__ . '/Js/index.js') ?>"></script>
     <script src="Js/menu.js?v=<?= filemtime(__DIR__ . '/Js/menu.js') ?>"></script>
+    <script src="Js/tablas.js?v=<?= filemtime(__DIR__ . '/Js/tablas.js') ?>"></script>
 </body>
 
 </html>

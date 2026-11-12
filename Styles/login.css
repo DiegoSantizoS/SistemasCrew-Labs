@@ -353,3 +353,43 @@ body {
     opacity: .6;
     cursor: wait;
 }
+
+.pagina-acceso,
+.acceso,
+.paneles-formularios,
+.panel-formulario,
+.formulario-cuenta,
+.campo-formulario {
+    min-width: 0;
+}
+
+.encabezado-acceso {
+    grid-template-columns: auto minmax(0, 1fr);
+}
+
+.nombre-sistema,
+.descripcion-sistema {
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+    .pagina-acceso {
+        min-height: 100dvh;
+        padding: 1rem 0.75rem;
+    }
+
+    .acceso {
+        padding: 1.5rem 1rem;
+    }
+
+    .entrada-campo {
+        min-height: 44px;
+        font-size: 1rem;
+    }
+
+    .pestana-formulario,
+    .boton-enviar,
+    .boton-cambiar-formulario {
+        min-height: 44px;
+    }
+}
