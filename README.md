@@ -1,40 +1,107 @@
-# SistemasCrew-Labs
+﻿# SistemasCrew-Labs
 
-Sistema de gestión de equipos de laboratorio con PHP, MySQL/PDO y JavaScript, sin frameworks ni compilación.
+Aplicación para gestionar equipos de laboratorio con PHP, MySQL/MariaDB, PDO, HTML, CSS y JavaScript. No requiere framework ni compilación.
 
-## Configuración
+## Estado de esta copia
 
-1. Sirve esta carpeta con Apache/PHP (por ejemplo, XAMPP) en `/SistemasCrew-Labs/`.
-2. Habilita `pdo_mysql` y `mbstring`. Las pruebas HTTP también necesitan `curl` en PHP.
-3. Conserva la configuración de conexión existente en `api/core/.env`: `DATABASE_URL`, `DATABASE_USER`, `DATABASE_PSSW`, `DATABASE_NAME` y `DATABASE_CHARSET`. No publiques este archivo.
-4. Usa la base existente con las tablas de `Scripts/SistemasCrew.sql`. **Ese script elimina la base: no lo ejecutes sobre datos existentes.** La integración no necesita migraciones. Deben existir el rol `Usuario` y el estado `Activo`; sus IDs se resuelven por nombre. Conserva los índices únicos de correo, carnet y nombre de usuario.
-5. Abre `http://localhost/SistemasCrew-Labs/login.php`. Las cuentas existentes deben tener hashes generados con `password_hash`; no se aceptan contraseñas almacenadas en texto plano. El registro público siempre crea usuarios ordinarios. Los roles administrativos se asignan por el procedimiento administrativo de tu instalación.
+- Acceso, registro y cierre de sesión implementados.
+- Inventario con listado paginado, detalles, creación, edición y baja lógica de equipos.
+- Catálogos de categorías, ubicaciones y estados para el inventario.
+- El esquema incluye préstamos, devoluciones, multas, historial y permisos, pero esta copia no incluye sus módulos funcionales completos. `Sites/historial.html` es una página de ejemplo.
+- Los enlaces del menú no garantizan una pantalla implementada. No están presentes el mantenimiento de usuarios ni las API de préstamos, devoluciones e historial.
 
-## Autenticación y acceso
+## Requisitos
 
-`login.php` carga exclusivamente `Styles/login.css`, `Js/login.js` y las fuentes DM Sans locales en `fonts/`. Ofrece pestañas de acceso y registro, validación en español, navegación por teclado y controles para mostrar contraseñas.
+- Apache y PHP 8 o superior; XAMPP es una opción para desarrollo local.
+- MySQL o MariaDB compatible con el esquema. Los datos de ejemplo están preparados para MySQL 8.0 o superior.
+- Extensiones PHP `pdo_mysql` y `mbstring`; la prueba de integración también requiere `curl`.
+- Navegador moderno con JavaScript habilitado.
+- Node.js solamente para las comprobaciones de JavaScript.
 
-El registro requiere nombres y apellidos (100 caracteres cada uno), carnet y usuario (50), correo (150), contraseña y confirmación; el teléfono (20) es opcional. La contraseña admite al menos 8 caracteres y hasta 72 bytes, preserva sus espacios y se almacena con `PASSWORD_DEFAULT`. `Persona` y `Usuario` se insertan en una transacción; los conflictos únicos devuelven HTTP 409. Al terminar, se vuelve a la pestaña de acceso.
+## Instalación local
 
-Los POST `api/auth/login.php` y `register.php` reciben JSON y el token CSRF de la sesión. El acceso verifica el hash con `password_verify` y exige estado `Activo`, usando el mismo error para credenciales incorrectas y cuentas no habilitadas. Se regenera el ID de sesión y se guarda únicamente el ID y nombre del usuario. El dashboard permanece en `index.php`, protegido y con el nombre escapado.
+1. Colocar el proyecto en el directorio público de Apache, por ejemplo `C:\xampp\htdocs\SistemasCrew-Labs`.
+2. Iniciar Apache y MySQL.
+3. Preparar la base:
+   - Para una instalación nueva, importar `Scripts/SistemasCrew.sql`: crea la estructura y los catálogos iniciales.
+   - **Este script elimina y reconstruye la base. No ejecutarlo sobre información que se deba conservar.**
+   - Opcionalmente, importar `Scripts/Inserts.sql` después del esquema y solo en una base recién creada. Supone identificadores iniciales específicos; no es una migración ni debe ejecutarse repetidamente.
+   - Si existe una base compatible, conservarla sin volver a importar esos scripts.
+4. Crear o configurar localmente `api/core/.env` con estas claves:
 
-`CerrarSesion` envía un POST con CSRF a `api/auth/logout.php`, destruye la sesión, elimina su cookie y redirige al acceso. Cookies HttpOnly y SameSite Strict, Secure bajo HTTPS y ruta ajustada al directorio del proyecto; HTTP local también funciona. En un proxy HTTPS, configura Apache para reconocer HTTPS de manera confiable.
+   | Clave | Contenido esperado |
+   | --- | --- |
+   | `DATABASE_URL` | Host del servidor MySQL |
+   | `DATABASE_USER` | Usuario de conexión |
+   | `DATABASE_PSSW` | Contraseña de conexión |
+   | `DATABASE_NAME` | Nombre de la base creada por el esquema |
+   | `DATABASE_CHARSET` | Juego de caracteres, normalmente `utf8mb4` |
+   | `COOKIE_NAME` | Nombre de cookie definido por la configuración |
+   | `COOKIE_KEY` | Clave privada definida por la configuración |
 
-Todos los endpoints `api/admin/` exigen sesión y comprueban el estado actual en MySQL. Los usuarios registrados pueden consultar el inventario; las escrituras requieren rol `Administrador` o `Encargado` y cabecera `X-CSRF-Token`. No había reglas de permisos implementadas ni permisos asignados en el esquema inicial; esta política protege las operaciones actuales de inventario. Las peticiones sin sesión reciben JSON 401 y el frontend redirige al acceso antes de interpretar el cuerpo. La API usa rutas relativas para funcionar en subdirectorios y bajo HTTPS.
+   No publicar `.env` ni sus valores. El acceso actual utiliza la sesión PHP; estas claves no demuestran que exista autenticación por cookie firmada.
+5. Abrir `http://localhost/SistemasCrew-Labs/login.php`.
+6. Registrar una cuenta o utilizar una cuenta del script de datos de prueba. El registro público asigna rol `Usuario` y estado `Activo`, sin conceder administración. Las contraseñas deben almacenarse con `password_hash`.
+
+Para un servidor público, configurar HTTPS y restricciones de Apache que impidan acceder a `.env`, scripts SQL, pruebas y archivos internos. Esta copia no incluye un `.htaccess` que establezca esas restricciones.
+
+## Organización
+
+| Ruta | Responsabilidad |
+| --- | --- |
+| `login.php` | Acceso y registro |
+| `index.php` | Página principal protegida y navegación |
+| `Sites/` | Vistas HTML |
+| `Styles/` | Estilos de acceso, inicio e inventario |
+| `Js/` | Formularios, navegación y operaciones de inventario |
+| `api/auth/` | Acceso, registro y salida |
+| `api/admin/` | Equipos y catálogos |
+| `api/models/` | Consultas y persistencia |
+| `api/helpers/` | Sesión, CSRF y utilidades |
+| `api/core/` | Configuración, conexión PDO y respuestas |
+| `Scripts/` | Esquema y datos de ejemplo |
+| `tests/` | Pruebas disponibles |
+
+Para modificar la apariencia, editar `Styles/login.css`, `Styles/index.css` o `Styles/inventario.css`, según la página.
+
+## Autenticación y seguridad actual
+
+El registro inserta `Persona` y `Usuario` en una transacción, comprueba duplicados y genera el hash con `password_hash`. El acceso utiliza `password_verify` y exige cuenta activa. Los formularios de autenticación utilizan CSRF. Las cookies de sesión se configuran como HttpOnly y SameSite Strict, y Secure bajo HTTPS.
+
+`index.php` exige sesión. El helper `auth_admin()` comprueba identidad y restringe escrituras a Administrador o Encargado, pero **su llamada está comentada en `api/admin/Equipos.php`**. No considerar esta API protegida hasta corregir y verificar esa condición. Las tablas de permisos del esquema no equivalen a autorización aplicada por módulo y acción en el código actual.
 
 ## Verificación
 
-Con Apache y MySQL activos:
+Comprobaciones de sintaxis desde la raíz:
+
+```powershell
+C:\xampp\php\php.exe -l login.php
+C:\xampp\php\php.exe -l index.php
+node --check Js/login.js
+node --check Js/index.js
+node --check Js/inventario.js
+```
+
+Con Apache, MySQL y `curl` de PHP activos, preferiblemente en una base de pruebas:
 
 ```powershell
 C:\xampp\php\php.exe tests/auth-integration.php
-node --check Js/login.js
-node --check Js/inventario.js
-Get-ChildItem -Recurse -Filter *.php | ForEach-Object { C:\xampp\php\php.exe -l $_.FullName }
 ```
 
-Opcionalmente define `AUTH_TEST_URL` con la URL del proyecto terminada en `/`. La prueba CLI crea cuentas temporales con nombres aleatorios y las elimina en `finally`; no modifica cuentas existentes. Comprueba registro, confirmación, duplicados por validación y restricciones MySQL, hash y espacios en contraseña, acceso correcto e incorrecto, estados Inactivo/Bloqueado, sesión persistente, redirecciones, restricciones de escritura, CSRF, rollback con fallo de inserción inyectado, consultas de inventario, logout y recursos locales.
+La prueba crea registros temporales para comprobar autenticación, duplicados, persistencia y restricciones de acceso; su bloque de limpieza intenta eliminarlos. No reconstruye la base. Si cambia la ubicación, configurar `AUTH_TEST_URL` con la URL del proyecto terminada en `/`.
 
-En esta implementación se ejecutaron las comprobaciones PHP, JavaScript y HTTP/MySQL. La inspección visual del navegador quedó bloqueada por un fallo de inicialización de su entorno; quedan pendientes la comprobación visual móvil/escritorio, interacción de pestañas y contraseñas, y operaciones de escritura de inventario desde la interfaz. Las consultas de los cinco endpoints existentes se verificaron con sesión.
+La prueba espera rechazo de solicitudes anónimas: la protección desactivada de Equipos debe resolverse antes de esperar que toda la prueba apruebe. Otras pruebas pueden depender de módulos ausentes; revisar sus dependencias antes de ejecutarlas.
 
-La plantilla visual se adaptó de `login-page-10` de Colorlib; se conservan sus estilos, animaciones y fuentes locales.
+Esta actualización documental se verificó contra los archivos presentes. No se ejecutaron pruebas funcionales ni importaciones SQL. Quedan pendientes la comprobación completa en navegador, la revisión móvil y una instalación limpia.
+
+## Pendientes de entrega
+
+- Recuperar o completar préstamos, devoluciones e historial de movimientos.
+- Aplicar y verificar autorización en las API y coherencia con el menú.
+- Identificar vencidos por fecha y probar disponibilidad y devolución de principio a fin.
+- Revisar la coherencia de los datos de ejemplo.
+- Probar escritorio, móvil y navegación por teclado.
+- Preparar video, evidencias de participación y defensa técnica de los tres integrantes.
+- Revisar las condiciones de autoría y uso de IA del documento del curso.
+
+Las referencias visuales y carpetas de ejemplos no sustituyen módulos funcionales. Conservar las atribuciones y licencias correspondientes a los recursos reutilizados.
